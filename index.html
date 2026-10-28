@@ -1,0 +1,2986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deal Studio</title>
+  <meta name="theme-color" content="#0A1F18" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+/* =====================================================================
+   Deal Studio — application shell
+   Sidebar app layout · dense, ruled surfaces · mono figures
+   ===================================================================== */
+:root{
+  --ink:#0E1A15;
+  --ink-2:#2B3A33;
+  --muted:#5E6B64;
+  --muted-2:#8B958F;
+  --paper:#F4F5F3;
+  --surface:#FFFFFF;
+  --surface-2:#F8F9F7;
+  --line:#E3E6E2;
+  --line-strong:#CDD3CE;
+  --forest:#0A1F18;
+  --forest-2:#12302A;
+  --forest-3:#1A3F37;
+  --brand:#0F5C3F;
+  --brand-hover:#0B4A33;
+  --lime:#C6F36B;
+  --tint:#E7F1EB;
+  --tint-2:#D3E5DA;
+  --good:#1E7A4B; --good-soft:#E6F3EB;
+  --warn:#9A5B0B; --warn-soft:#FBF1DF;
+  --bad:#B0332A;  --bad-soft:#FBEAE8;
+
+  /* legacy names used by inline styles in generated markup */
+  --danger:var(--bad); --green:var(--good); --green-soft:var(--good-soft);
+  --sage:var(--tint); --sage-2:var(--tint-2); --fern:var(--brand); --pine:var(--forest);
+  --navy:var(--forest); --blue:var(--brand); --blue-soft:var(--tint);
+  --bg:var(--paper); --card:var(--surface); --text:var(--ink);
+
+  --r-lg:12px; --r-md:8px; --r-sm:6px;
+  --side:268px;
+  --font:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --ease:cubic-bezier(.2,.7,.2,1);
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:var(--font);font-size:14.5px;line-height:1.5;background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased;font-feature-settings:"cv11","ss03"}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--brand)}
+::selection{background:var(--lime);color:var(--forest)}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.num,.value,.data-table td,.score-ring b,.match-score{font-variant-numeric:tabular-nums}
+
+/* ---------- Shell ---------- */
+.app-shell{display:grid;grid-template-columns:var(--side) minmax(0,1fr);min-height:100vh}
+
+.sidebar{
+  position:sticky;top:0;height:100vh;
+  display:flex;flex-direction:column;
+  background:var(--forest);color:#C9D6CF;
+  padding:22px 14px 16px;
+  border-right:1px solid #000;
+}
+.brand{display:flex;align-items:center;gap:11px;padding:2px 8px 22px}
+.brand-mark{flex:0 0 auto;display:block}
+.brand-title{font-weight:650;font-size:1.02rem;letter-spacing:-.02em;color:#fff;line-height:1.1}
+.brand-subtitle{font-size:.74rem;color:#7F9689;margin-top:3px}
+
+.main-nav{display:flex;flex-direction:column;gap:2px;overflow-y:auto;flex:1 1 auto}
+.nav-group{font-size:.72rem;font-weight:550;color:#6F877B;padding:16px 10px 6px;letter-spacing:.01em}
+.nav-group:first-child{padding-top:4px}
+.nav-tab{
+  position:relative;display:flex;align-items:center;gap:11px;
+  width:100%;border:0;background:transparent;color:#B7C7BE;
+  font-size:.9rem;font-weight:500;text-align:left;
+  padding:9px 10px;border-radius:var(--r-md);
+  transition:background .15s var(--ease),color .15s var(--ease);
+}
+.nav-tab svg{width:18px;height:18px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
+.nav-tab:hover{background:var(--forest-2);color:#fff}
+.nav-tab.active{background:var(--forest-3);color:#fff}
+.nav-tab.active::before{content:"";position:absolute;left:-14px;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;background:var(--lime)}
+.nav-tab.active svg{stroke:var(--lime);opacity:1}
+
+.side-foot{padding-top:14px;border-top:1px solid var(--forest-3);margin-top:10px}
+.ctx-btn{display:flex;align-items:center;gap:11px;width:100%;border:1px solid var(--forest-3);background:var(--forest-2);border-radius:var(--r-md);padding:10px 12px;text-align:left;color:#fff;transition:border-color .15s var(--ease),background .15s var(--ease)}
+.ctx-btn:hover{border-color:#2E5A4E;background:var(--forest-3)}
+.ctx-btn svg{width:20px;height:20px;fill:none;stroke:var(--lime);stroke-width:1.6;stroke-linecap:round;flex:0 0 auto}
+.ctx-btn b{display:block;font-size:.84rem;font-weight:600}
+.ctx-btn small{display:block;font-size:.72rem;color:#7F9689;margin-top:1px}
+
+.stage{min-width:0;display:flex;flex-direction:column}
+.topbar{
+  position:sticky;top:0;z-index:20;height:56px;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:0 40px;background:rgba(244,245,243,.86);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
+}
+.crumbs{display:flex;align-items:center;gap:9px;font-size:.84rem;color:var(--muted)}
+.crumbs i{font-style:normal;color:var(--line-strong)}
+.crumbs strong{color:var(--ink);font-weight:600}
+.status-pill{display:flex;align-items:center;gap:7px;font-size:.76rem;font-weight:500;color:var(--muted);padding:5px 11px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.status-pill .dot{width:7px;height:7px;border-radius:50%;background:var(--good)}
+
+/* ---------- Client context drawer ---------- */
+.scrim{position:fixed;inset:0;background:rgba(10,31,24,.42);opacity:0;pointer-events:none;transition:opacity .2s var(--ease);z-index:40}
+.scrim.open{opacity:1;pointer-events:auto}
+.client-panel{
+  position:fixed;top:0;right:0;bottom:0;z-index:50;width:min(420px,100%);
+  background:var(--surface);border-left:1px solid var(--line);
+  padding:26px 26px 30px;overflow-y:auto;
+  transform:translateX(102%);visibility:hidden;
+  transition:transform .25s var(--ease),visibility 0s .25s;
+  box-shadow:-24px 0 60px rgba(10,31,24,.12);
+}
+.client-panel.open{transform:none;visibility:visible;transition:transform .25s var(--ease)}
+.client-panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:22px}
+.client-panel-head h2{margin:0;font-size:1.25rem;font-weight:650;letter-spacing:-.02em}
+.client-panel-head p{margin:4px 0 0;color:var(--muted);font-size:.84rem}
+.client-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+.policy-note{margin-top:22px;font-size:.78rem;color:var(--muted);background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-md);padding:11px 13px}
+
+/* ---------- Page ---------- */
+.workspace{width:100%;max-width:1220px;padding:34px 40px 64px;margin:0 auto;flex:1 1 auto}
+.page-head{display:flex;justify-content:space-between;gap:24px;align-items:flex-end;margin-bottom:26px;padding-bottom:22px;border-bottom:1px solid var(--line)}
+.page-kicker{margin:0 0 8px;font-size:.78rem;font-weight:550;color:var(--brand)}
+.page-head h1{margin:0;font-size:clamp(1.7rem,1.2rem + 1.4vw,2.35rem);line-height:1.08;letter-spacing:-.03em;font-weight:680;color:var(--ink)}
+.lede{margin:10px 0 0;color:var(--muted);max-width:64ch;font-size:.97rem;line-height:1.55}
+.eyebrow{font-size:.78rem;font-weight:550;color:var(--brand)}
+
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+.calculator-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(380px,430px);gap:22px;align-items:start}
+.results-column{min-width:0}
+.sticky-card{position:sticky;top:78px}
+.two-column{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;align-items:start}
+
+/* ---------- Panels ---------- */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:24px;box-shadow:0 1px 0 rgba(10,31,24,.03)}
+.panel-head{display:flex;align-items:flex-start;gap:13px;margin-bottom:20px}
+.panel-head.compact{margin-bottom:18px}
+.panel-head h3{margin:0;font-size:1rem;font-weight:650;letter-spacing:-.015em}
+.panel-head p{margin:3px 0 0;color:var(--muted);font-size:.83rem;line-height:1.45}
+.step-number{flex:0 0 auto;min-width:32px;height:24px;padding:0 7px;border-radius:6px;display:grid;place-items:center;background:var(--forest);color:var(--lime);font-family:var(--mono);font-weight:500;font-size:.72rem;margin-top:1px}
+
+.product-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.pill,.source-pill{display:inline-flex;align-items:center;min-height:24px;padding:3px 10px;border-radius:6px;font-size:.73rem;font-weight:550}
+.pill{background:var(--tint);color:var(--brand)}
+.source-pill{background:var(--surface-2);color:var(--muted);border:1px solid var(--line)}
+.divider{height:1px;background:var(--line);margin:24px 0}
+
+/* ---------- Forms ---------- */
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field.full{grid-column:1/-1}
+.field>span{font-size:.78rem;font-weight:550;color:var(--ink-2)}
+.field input,.field select{
+  width:100%;min-height:42px;border:1px solid var(--line-strong);background:var(--surface);
+  padding:9px 12px;border-radius:var(--r-md);outline:none;
+  transition:border-color .15s var(--ease),box-shadow .15s var(--ease);
+}
+.field select{appearance:none;-webkit-appearance:none;padding-right:34px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1.5l5 5 5-5' stroke='%235E6B64' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 13px center}
+.field input[type=number]{font-family:var(--mono);font-size:.9rem}
+.field input:hover,.field select:hover{border-color:var(--muted-2)}
+.field input:focus,.field select:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(15,92,63,.16)}
+.field input::placeholder{color:var(--muted-2);font-family:var(--font)}
+.field small,.hint{color:var(--muted);font-size:.76rem;line-height:1.45}
+
+.input-prefix{display:flex;align-items:center;border:1px solid var(--line-strong);border-radius:var(--r-md);background:var(--surface);overflow:hidden;transition:border-color .15s var(--ease),box-shadow .15s var(--ease)}
+.input-prefix:hover{border-color:var(--muted-2)}
+.input-prefix:focus-within{border-color:var(--brand);box-shadow:0 0 0 3px rgba(15,92,63,.16)}
+.input-prefix>span{padding:0 0 0 12px;color:var(--muted);font-family:var(--mono);font-size:.9rem}
+.input-prefix input{border:0!important;box-shadow:none!important;background:transparent!important;min-height:40px}
+
+.section-block{border:1px solid var(--line);border-radius:var(--r-md);padding:16px;margin-bottom:14px;background:var(--surface-2)}
+.section-block-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.section-block-title h4{margin:0;font-size:.88rem;font-weight:650}
+.section-block-title span{font-size:.74rem;color:var(--muted)}
+
+.advanced{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
+.advanced summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;font-size:.84rem;font-weight:600;color:var(--ink-2)}
+.advanced summary::-webkit-details-marker{display:none}
+.advanced summary::after{content:"";width:8px;height:8px;border-right:1.6px solid var(--muted);border-bottom:1.6px solid var(--muted);transform:rotate(45deg) translateY(-3px);transition:transform .2s var(--ease)}
+.advanced[open] summary::after{transform:rotate(225deg) translate(-2px,-1px)}
+.advanced .form-grid{margin-top:16px}
+
+/* ---------- Results ---------- */
+.kpi-hero{background:var(--forest);color:#fff;border-radius:var(--r-md);padding:22px;margin-bottom:12px;border-left:4px solid var(--lime)}
+.kpi-hero .label{font-size:.78rem;font-weight:550;color:#9FB8AB}
+.kpi-hero .value{font-family:var(--mono);font-size:clamp(1.9rem,1.5rem + 1.3vw,2.55rem);font-weight:500;letter-spacing:-.03em;margin-top:6px;line-height:1.05}
+.kpi-hero .sub{font-size:.8rem;color:#B9CDC2;margin-top:8px}
+
+.kpi-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0;border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;background:var(--surface)}
+.kpi{padding:14px 16px;min-height:90px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);margin:-1px -1px 0 0}
+.kpi .label{font-size:.74rem;font-weight:550;color:var(--muted)}
+.kpi .value{font-family:var(--mono);font-size:1.15rem;font-weight:500;letter-spacing:-.02em;color:var(--ink);margin-top:5px;word-break:break-word}
+.kpi .sub{font-size:.73rem;color:var(--muted);margin-top:4px;line-height:1.4}
+
+.client-summary{margin-top:14px;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-md);padding:15px 16px}
+.client-summary .summary-title{font-size:.76rem;font-weight:650;color:var(--brand);margin-bottom:6px}
+.client-summary p{margin:0;color:var(--ink-2);font-size:.86rem;line-height:1.6}
+
+/* ---------- Buttons ---------- */
+.actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.primary-btn,.secondary-btn,.icon-btn,.ghost-btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  border-radius:var(--r-md);padding:9px 16px;font-weight:600;font-size:.84rem;border:1px solid transparent;
+  transition:background .15s var(--ease),border-color .15s var(--ease),transform .1s var(--ease);
+}
+.primary-btn{background:var(--brand);color:#fff}
+.primary-btn:hover{background:var(--brand-hover)}
+.primary-btn:disabled{opacity:.55;cursor:progress}
+.secondary-btn,.icon-btn,.ghost-btn{background:var(--surface);color:var(--ink);border-color:var(--line-strong)}
+.secondary-btn:hover,.icon-btn:hover,.ghost-btn:hover{background:var(--surface-2);border-color:var(--muted-2)}
+.primary-btn:active,.secondary-btn:active,.ghost-btn:active{transform:scale(.98)}
+
+/* ---------- Callouts ---------- */
+.callout{border-radius:var(--r-md);padding:11px 14px;font-size:.81rem;line-height:1.5;margin-top:14px;border:1px solid var(--line)}
+.callout.info{background:var(--surface-2);color:var(--ink-2)}
+.callout.warning{background:var(--warn-soft);color:#5E3A06;border-color:#EBD3A3}
+.callout.good{background:var(--good-soft);color:#165E39;border-color:#B4D9C3}
+
+/* ---------- Matcher ---------- */
+.choice-list{display:grid;gap:8px;margin-top:16px}
+.check-row{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:flex-start;border:1px solid var(--line);border-radius:var(--r-md);padding:12px 14px;background:var(--surface);cursor:pointer;transition:background .15s var(--ease),border-color .15s var(--ease)}
+.check-row:hover{background:var(--surface-2)}
+.check-row:has(input:checked){border-color:var(--brand);background:var(--tint)}
+.check-row input{margin-top:3px;accent-color:var(--brand);width:16px;height:16px}
+.check-row strong{display:block;font-size:.85rem;font-weight:600}
+.check-row small{display:block;font-size:.76rem;color:var(--muted);margin-top:2px}
+
+.match-card{border:1px solid var(--line);border-radius:var(--r-md);padding:14px 16px;margin-bottom:10px;background:var(--surface)}
+.match-card:first-of-type{border-color:var(--brand);box-shadow:inset 3px 0 0 var(--brand)}
+.match-rank{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.match-rank span:first-child{font-size:.76rem;color:var(--muted);font-weight:550}
+.match-score{min-width:30px;height:22px;padding:0 8px;border-radius:6px;display:grid;place-items:center;background:var(--forest);color:var(--lime);font-family:var(--mono);font-size:.72rem}
+.match-name{font-weight:650;margin-top:6px;letter-spacing:-.01em}
+.match-why{font-size:.79rem;color:var(--muted);margin-top:4px;line-height:1.45}
+
+/* ---------- Library ---------- */
+.library-filter{min-width:230px}
+.library-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start}
+.product-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:20px 22px;display:flex;flex-direction:column;gap:10px;transition:border-color .15s var(--ease),box-shadow .15s var(--ease)}
+.product-card:hover{border-color:var(--line-strong)}
+.product-card.open{grid-column:1/-1;border-color:var(--brand);box-shadow:0 0 0 3px rgba(15,92,63,.08)}
+.product-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.group-tag{font-size:.74rem;font-weight:550;color:var(--brand);margin-bottom:3px}
+.product-card h3{margin:0;font-size:1.06rem;font-weight:650;letter-spacing:-.02em}
+.product-card p{margin:0;color:var(--muted);font-size:.86rem;line-height:1.55}
+.product-card>button{align-self:flex-start;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);padding:6px 12px;border-radius:var(--r-md);font-size:.8rem;font-weight:600}
+.product-card>button:hover{background:var(--surface-2);border-color:var(--muted-2)}
+.product-details{display:none;border-top:1px solid var(--line);padding-top:6px;margin-top:4px}
+.product-card.open .product-details{display:block}
+.product-details h4{margin:16px 0 6px;font-size:.78rem;font-weight:650;color:var(--brand)}
+.product-details p{color:var(--ink-2);font-size:.9rem;line-height:1.65;max-width:78ch}
+.product-details ul{margin:0;padding-left:18px}
+.product-details li{font-size:.86rem;color:var(--ink-2);line-height:1.55;margin:4px 0}
+.pd-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 32px}
+.product-details .pd-note{font-size:.8rem;color:var(--muted);margin-top:14px}
+.product-details .pd-note+.pd-note{margin-top:4px}
+
+/* ---------- Footer ---------- */
+.footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);display:flex;gap:6px 22px;flex-wrap:wrap;color:var(--muted-2);font-size:.75rem}
+
+/* =====================================================================
+   Statement analyzer
+   ===================================================================== */
+.analyzer-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;align-items:start}
+.file-drop{display:block;border:1.5px dashed var(--line-strong);border-radius:var(--r-md);padding:28px 20px;text-align:center;background:var(--surface-2);cursor:pointer;margin-top:16px;transition:background .15s var(--ease),border-color .15s var(--ease)}
+.file-drop:hover,.file-drop.drag{border-color:var(--brand);background:var(--tint)}
+.file-drop strong{display:block;font-size:.93rem;font-weight:600}
+.file-drop small{color:var(--muted);font-size:.79rem}
+.file-list{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;margin-top:12px}
+.file-row{display:flex;justify-content:space-between;align-items:center;gap:10px;border:1px solid var(--line);border-radius:var(--r-md);padding:9px 12px;background:var(--surface)}
+.file-info{min-width:0;flex:1 1 auto}
+.file-info .name{font-weight:600;font-size:.83rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.file-info .meta{font-size:.75rem;color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.file-actions{display:flex;align-items:center;gap:6px;flex:0 0 auto}
+.x-btn{border:0;background:var(--surface-2);color:var(--muted);width:26px;height:26px;border-radius:6px;font-weight:600;line-height:1}
+.x-btn:hover{background:var(--tint);color:var(--ink)}
+.badge{font-size:.71rem;font-weight:600;padding:3px 9px;border-radius:6px;white-space:nowrap}
+.badge.ok{background:var(--good-soft);color:#17653D}
+.badge.warn{background:var(--warn-soft);color:var(--warn)}
+.badge.err{background:var(--bad-soft);color:var(--bad)}
+.badge.busy{background:var(--tint);color:var(--brand)}
+.badge.idle{background:var(--surface-2);color:var(--muted);box-shadow:inset 0 0 0 1px var(--line)}
+.manual-row{border:1px solid var(--line);border-radius:var(--r-md);padding:16px;margin-top:12px;background:var(--surface-2)}
+
+.report{margin-top:22px;display:grid;grid-template-columns:minmax(0,1fr);gap:22px}
+
+/* Verdict — the one bold surface */
+.verdict{position:relative;overflow:hidden;border-radius:var(--r-lg);padding:30px 32px;color:#fff;display:flex;justify-content:space-between;gap:24px;align-items:center;flex-wrap:wrap;border-left:6px solid var(--lime)}
+.verdict>div:first-child{min-width:0;flex:1 1 320px;position:relative;z-index:1}
+.verdict.submit{background:var(--forest)}
+.verdict.conditions{background:#4F3A0D;border-left-color:#F0C35C}
+.verdict.heloc{background:#1B3947;border-left-color:#8CC8E3}
+.verdict.pass{background:#4F1A16;border-left-color:#F08B82}
+.verdict .v-label{font-size:.8rem;font-weight:550;opacity:.75}
+.verdict .v-title{font-size:clamp(1.8rem,1.3rem + 1.8vw,2.6rem);font-weight:680;margin-top:4px;letter-spacing:-.03em;line-height:1.06}
+.verdict .v-sub{font-size:.93rem;opacity:.88;margin-top:8px;max-width:640px;line-height:1.5}
+.verdict .v-path{font-size:.84rem;margin-top:16px;background:rgba(255,255,255,.1);border-radius:var(--r-md);padding:10px 13px;display:inline-block;line-height:1.45}
+.score-ring{position:relative;z-index:1;width:92px;height:92px;border-radius:var(--r-md);display:grid;place-items:center;text-align:center;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.07)}
+.score-ring b{font-family:var(--mono);font-size:1.9rem;font-weight:500;display:block;line-height:1;letter-spacing:-.04em}
+.score-ring span{font-size:.7rem;opacity:.75}
+
+.kpi-grid.four{grid-template-columns:repeat(4,minmax(0,1fr))}
+.report .kpi{background:var(--surface)}
+.kpi.bad .value{color:var(--bad)}
+.kpi.warn .value{color:var(--warn)}
+.kpi.good .value{color:var(--good)}
+
+.table-wrap{overflow-x:auto}
+.data-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.data-table th{text-align:left;font-size:.72rem;font-weight:600;color:var(--muted);padding:9px 10px;border-bottom:1px solid var(--line-strong);background:var(--surface-2);white-space:nowrap}
+.data-table td{padding:9px 10px;border-bottom:1px solid var(--line);color:var(--ink-2);vertical-align:top}
+.data-table .num,.data-table td.num{text-align:right;white-space:nowrap;font-family:var(--mono);font-size:.8rem}
+.data-table tbody tr:hover td{background:var(--surface-2)}
+.data-table tr:last-child td{border-bottom:0}
+.data-table tfoot td{font-weight:650;color:var(--ink);border-top:1px solid var(--line-strong);border-bottom:0}
+.amt-pos{color:var(--good)}
+.amt-neg{color:var(--bad)}
+.status-ok{color:var(--good);font-weight:600}
+.status-bad{color:var(--bad);font-weight:600}
+.status-warn{color:var(--warn);font-weight:600}
+
+.flag-list{display:grid;gap:8px}
+.flag{border-radius:var(--r-md);padding:11px 14px;font-size:.82rem;line-height:1.5;border:1px solid transparent}
+.flag strong{display:block;margin-bottom:2px;font-size:.86rem;font-weight:650}
+.flag.hard{background:var(--bad-soft);color:#6B1F19;border-color:#F0C9C5;box-shadow:inset 3px 0 0 var(--bad)}
+.flag.soft{background:var(--warn-soft);color:#5E3A06;border-color:#EBD3A3;box-shadow:inset 3px 0 0 #D9A24A}
+.flag.good{background:var(--good-soft);color:#165E39;border-color:#B4D9C3;box-shadow:inset 3px 0 0 var(--good)}
+.flag-tag{display:inline-block;font-size:.72rem;font-weight:600;margin-right:6px;opacity:.7}
+.question-list{margin:0;padding-left:20px}
+.question-list li{font-size:.87rem;color:var(--ink-2);line-height:1.55;margin:6px 0;padding-left:4px}
+.question-list li::marker{color:var(--brand);font-weight:600}
+.mini-select{min-height:30px;padding:3px 8px;border:1px solid var(--line-strong);border-radius:var(--r-sm);font-size:.77rem;background:var(--surface);max-width:220px}
+.mini-select:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px rgba(15,92,63,.16)}
+.txn-details{border:1px solid var(--line);border-radius:var(--r-md);margin-top:10px;background:var(--surface);overflow:hidden}
+.txn-details summary{cursor:pointer;padding:13px 16px;font-size:.85rem;font-weight:600}
+.txn-details summary:hover{background:var(--surface-2)}
+.txn-details[open] summary{border-bottom:1px solid var(--line)}
+.txn-details .table-wrap{max-height:520px;overflow:auto}
+.empty-state{text-align:center;color:var(--muted);font-size:.9rem;padding:42px 24px}
+.empty-state strong{display:block;color:var(--ink);font-size:1.1rem;font-weight:650;letter-spacing:-.02em;margin-bottom:6px}
+.muted{color:var(--muted)}
+
+/* =====================================================================
+   Lender match
+   ===================================================================== */
+.lm-sheet-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+.lm-sheet-row .hint{flex:1 1 220px}
+.lm-panel .panel-head h3{font-size:1.4rem!important;letter-spacing:-.03em}
+.lm-panel .panel-head p{font-size:.92rem;color:var(--ink-2)}
+.lm-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.lm-card{border:1px solid var(--line);border-radius:var(--r-md);padding:16px;background:var(--surface);display:flex;flex-direction:column;gap:9px;min-width:0}
+.lm-card.lm-yes{border-color:#9CCFB1;box-shadow:inset 0 3px 0 var(--good)}
+.lm-card.lm-maybe{border-color:#E8D09D;box-shadow:inset 0 3px 0 #D9A24A}
+.lm-card.lm-no,.lm-card.lm-na,.lm-card.lm-unknown{background:var(--surface-2)}
+.lm-card.lm-no h4,.lm-card.lm-na h4{color:var(--muted)}
+.lm-card-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.lm-card-head h4{margin:0;font-size:1rem;font-weight:650;letter-spacing:-.02em}
+.lm-note{margin:0;font-size:.78rem;color:var(--muted);line-height:1.45}
+.lm-reasons{list-style:none;margin:0;padding:0;display:grid;gap:5px}
+.lm-reasons li{display:grid;grid-template-columns:14px 1fr;gap:7px;font-size:.79rem;line-height:1.45}
+.lm-reasons li span{font-weight:700}
+.lm-reasons .bad{color:var(--bad)}
+.lm-reasons .warn{color:var(--warn)}
+.lm-reasons .unk{color:var(--muted)}
+.lm-reasons .good{color:#17653D}
+.lm-basis{font-size:.73rem;color:var(--muted-2);line-height:1.4;margin-top:auto;padding-top:9px;border-top:1px solid var(--line)}
+.lm-names summary{cursor:pointer;font-size:.79rem;font-weight:600;color:var(--brand)}
+.lm-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+.lm-chip{font-size:.72rem;background:var(--surface);color:var(--ink-2);border:1px solid var(--line);border-radius:6px;padding:2px 8px}
+.lm-chip-doc{background:var(--forest);border-color:var(--forest);color:var(--lime);font-weight:600}
+.lm-sub{margin:26px 0 12px;font-size:1rem;font-weight:650;letter-spacing:-.02em}
+.lm-why{font-size:.78rem;line-height:1.5;min-width:220px}
+.lm-est,.lm-pref{font-size:.67rem;font-weight:600;border-radius:5px;padding:1px 6px}
+.lm-est{background:var(--surface-2);color:var(--muted);box-shadow:inset 0 0 0 1px var(--line)}
+.lm-pref{background:var(--warn-soft);color:var(--warn)}
+
+/* ---------- Responsive ---------- */
+@media (max-width:1180px){
+  .calculator-layout,.two-column,.analyzer-grid,.report .two-column{grid-template-columns:minmax(0,1fr)}
+  .sticky-card{position:static}
+  .kpi-grid.four{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .lm-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:900px){
+  .app-shell{grid-template-columns:minmax(0,1fr)}
+  .sidebar{position:sticky;top:0;z-index:30;height:auto;flex-direction:row;align-items:center;gap:8px;padding:10px 12px;border-right:0;border-bottom:1px solid #000;overflow:hidden}
+  .brand{padding:0 6px 0 2px}
+  .brand-text{display:none}
+  .main-nav{flex-direction:row;align-items:center;gap:2px;overflow-x:auto;scrollbar-width:none;flex:1 1 auto}
+  .main-nav::-webkit-scrollbar{display:none}
+  .nav-group{display:none}
+  .nav-tab{width:auto;white-space:nowrap;padding:8px 11px;font-size:.84rem}
+  .nav-tab svg{display:none}
+  .nav-tab.active::before{display:none}
+  .side-foot{border:0;margin:0;padding:0;flex:0 0 auto}
+  .ctx-btn{padding:8px 10px}
+  .ctx-btn span{display:none}
+  .topbar{top:57px;padding:0 20px}
+  .workspace{padding:26px 20px 56px}
+  .page-head{flex-direction:column;align-items:flex-start}
+  .library-filter{width:100%;min-width:0}
+  .library-grid{grid-template-columns:minmax(0,1fr)}
+  .pd-cols{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:640px){
+  .form-grid{grid-template-columns:minmax(0,1fr)}
+  .field.full{grid-column:auto}
+  .panel{padding:18px}
+  .kpi-grid,.kpi-grid.four{grid-template-columns:minmax(0,1fr)}
+  .verdict{padding:22px}
+  .lm-grid{grid-template-columns:minmax(0,1fr)}
+  .status-pill{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important;scroll-behavior:auto!important}
+}
+
+/* ---------- Print ---------- */
+@media print{
+  body{background:#fff}
+  .sidebar,.topbar,.client-panel,.scrim,.footer,.no-print,.analyzer-inputs,#analyzer .page-head{display:none!important}
+  .app-shell{display:block}
+  .workspace{max-width:none;padding:0}
+  .panel{break-inside:avoid}
+  .verdict,.kpi-hero,.lm-chip-doc,.score-ring{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+
+</style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Application">
+      <div class="brand">
+        <svg class="brand-mark" viewBox="0 0 32 32" width="32" height="32" role="img" aria-label="Deal Studio logo"><rect width="32" height="32" rx="9" fill="#C6F36B"/><path d="M9 8.5h6.2a7.5 7.5 0 0 1 0 15H9z" fill="#0A1F18"/><path d="M13.2 12.5h2a3.5 3.5 0 0 1 0 7h-2z" fill="#C6F36B"/></svg>
+        <div class="brand-text"><div class="brand-title">Deal Studio</div><div class="brand-subtitle">Funding workspace</div></div>
+      </div>
+
+      <nav class="main-nav" aria-label="Primary">
+        <div class="nav-group">Deal desk</div>
+        <button class="nav-tab active" data-tab="calculator" data-label="Calculator"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8.5 7.5h7M8.5 12h.01M12 12h.01M15.5 12h.01M8.5 16h.01M12 16h.01M15.5 16h.01"/></svg><span>Calculator</span></button>
+        <button class="nav-tab" data-tab="matcher" data-label="Product Matcher"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg><span>Product Matcher</span></button>
+        <div class="nav-group">Underwriting</div>
+        <button class="nav-tab" data-tab="analyzer" data-label="Statement Analyzer"><svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 17v-3M12 17v-6M15 17v-4"/></svg><span>Statement Analyzer</span></button>
+        <div class="nav-group">Reference</div>
+        <button class="nav-tab" data-tab="library" data-label="Product Library"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 21.5V5.5M8.5 7.5H15"/></svg><span>Product Library</span></button>
+        <button class="nav-tab" data-tab="payout" data-label="Payout"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6.5 12h.01M17.5 12h.01"/></svg><span>Payout</span></button>
+      </nav>
+
+      <div class="side-foot">
+        <button class="ctx-btn" id="toggleClientPanel" title="Client context" aria-controls="clientPanel">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c.8-3.6 3.5-5.5 7-5.5s6.2 1.9 7 5.5"/></svg>
+          <span><b>Client context</b><small>Name, revenue, FICO</small></span>
+        </button>
+      </div>
+    </aside>
+
+    <div class="stage">
+      <header class="topbar">
+        <div class="crumbs"><span>Deal Studio</span><i aria-hidden="true">/</i><strong id="crumb">Calculator</strong></div>
+        <div class="status-pill"><span class="dot"></span>Internal tool</div>
+      </header>
+
+      <div class="scrim" id="clientScrim"></div>
+      <section id="clientPanel" class="client-panel" aria-label="Client context">
+        <div class="client-panel-head">
+          <div>
+            <h2>Client context</h2>
+            <p>Keep the key deal details in one place.</p>
+          </div>
+          <button class="ghost-btn" id="closeClientPanel">Close</button>
+        </div>
+        <div class="client-grid">
+          <label class="field"><span>Client / business name</span><input id="clientName" placeholder="Optional" /></label>
+          <label class="field"><span>Average monthly revenue</span><div class="input-prefix"><span>$</span><input id="monthlyRevenue" type="number" min="0" step="5000" placeholder="0" /></div></label>
+          <label class="field"><span>Approx. FICO</span><input id="fico" type="number" min="0" max="850" step="10" placeholder="0" /></label>
+          <label class="field"><span>Months in business</span><input id="monthsBusiness" type="number" min="0" step="1" placeholder="0" /></label>
+        </div>
+        <div class="policy-note"><strong>Calculation rule:</strong> This tool calculates only the terms you enter. It does not create approvals or invent lender pricing.</div>
+      </section>
+
+      <main class="workspace">
+<!-- CALCULATOR -->
+      <section id="calculator" class="tab-panel active">
+        <div class="page-head"><div class="page-head-text"><p class="page-kicker">Deal desk</p><h1>Deal calculator</h1><p class="lede">Pick a product and enter the terms. Only the inputs relevant to that product are shown, and the summary updates as you type.</p></div></div>
+
+        <div class="calculator-layout">
+          <section class="panel input-panel">
+            <div class="panel-head">
+              <div class="step-number">01</div>
+              <div>
+                <h3>Select product</h3>
+                <p>Choose the product you are working with.</p>
+              </div>
+            </div>
+
+            <div class="product-select-wrap">
+              <label class="field">
+                <span>Product</span>
+                <select id="productSelect"></select>
+              </label>
+
+              <div id="productMeta" class="product-meta"></div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="panel-head">
+              <div class="step-number">02</div>
+              <div>
+                <h3>Enter deal terms</h3>
+                <p>Use actual approval or provider terms when quoting a client.</p>
+              </div>
+            </div>
+
+            <div id="productInputs"></div>
+          </section>
+
+          <aside class="results-column">
+            <section class="panel results-panel sticky-card">
+              <div class="panel-head compact">
+                <div class="step-number">03</div>
+                <div>
+                  <h3>Review deal</h3>
+                  <p>Client-facing summary and key economics.</p>
+                </div>
+              </div>
+
+              <div id="dealOutput"></div>
+            </section>
+          </aside>
+        </div>
+      </section>
+
+      <!-- MATCHER -->
+      <section id="matcher" class="tab-panel">
+        <div class="page-head"><div class="page-head-text"><p class="page-kicker">Deal desk</p><h1>Product matcher</h1><p class="lede">Describe what the client needs and get a short list of products worth investigating.</p></div></div>
+
+        <div class="two-column">
+          <section class="panel">
+            <div class="panel-head compact">
+              <div class="step-number">01</div>
+              <div>
+                <h3>Client need</h3>
+                <p>Answer only what you know.</p>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <label class="field full">
+                <span>Primary need</span>
+                <select id="matchUse">
+                  <option>Working capital / payroll</option>
+                  <option>Inventory / purchase order</option>
+                  <option>Equipment purchase</option>
+                  <option>Commercial real estate</option>
+                  <option>Expansion / general investment</option>
+                  <option>Refinance / consolidate</option>
+                </select>
+              </label>
+
+              <label class="field">
+                <span>Timing</span>
+                <select id="matchUrgency">
+                  <option>Within 1–3 days</option>
+                  <option>Within 1–2 weeks</option>
+                  <option>More than 2 weeks / flexible</option>
+                </select>
+              </label>
+
+              <label class="field">
+                <span>Credit profile</span>
+                <select id="matchCredit">
+                  <option>Strong</option>
+                  <option>Fair</option>
+                  <option>Challenged / unknown</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="choice-list">
+              <label class="check-row"><input id="matchRecurring" type="checkbox"><span><strong>Reusable access</strong><small>Client wants recurring access to capital</small></span></label>
+              <label class="check-row"><input id="matchInvoices" type="checkbox"><span><strong>B2B invoices</strong><small>Invoices are outstanding and waiting for payment</small></span></label>
+              <label class="check-row"><input id="matchPO" type="checkbox"><span><strong>Purchase orders</strong><small>Client has orders that still need to be fulfilled</small></span></label>
+              <label class="check-row"><input id="matchEquipment" type="checkbox"><span><strong>Equipment</strong><small>Client owns or plans to buy equipment</small></span></label>
+              <label class="check-row"><input id="matchProperty" type="checkbox"><span><strong>Commercial property</strong><small>Client owns or plans to buy commercial real estate</small></span></label>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-head compact">
+              <div class="step-number">02</div>
+              <div>
+                <h3>Recommended categories</h3>
+                <p>These are products to investigate, not approvals.</p>
+              </div>
+            </div>
+            <div id="matcherResults"></div>
+            <div class="callout warning">
+              <strong>Important:</strong> Never present a matcher result as an approval.
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <!-- STATEMENT ANALYZER -->
+      <section id="analyzer" class="tab-panel">
+        <div class="page-head"><div class="page-head-text"><p class="page-kicker">Underwriting</p><h1>Statement analyzer</h1><p class="lede">Drop in the client's bank statements to see verified revenue, open positions, cash-flow health, red flags and a pre-screen verdict, then match lenders.</p></div></div>
+
+        <section class="panel analyzer-inputs">
+          <div class="panel-head compact">
+            <div class="step-number">01</div>
+            <div>
+              <h3>Bank statements</h3>
+              <p>Add all 4 months the client sent, for every business account they included.</p>
+            </div>
+          </div>
+          <div class="form-grid">
+            <label class="field"><span>Anthropic API key</span><input id="saKey" type="password" placeholder="sk-ant-…" autocomplete="off" /></label>
+            <label class="field"><span>Reading speed</span>
+              <select id="saModel">
+                <option value="claude-sonnet-5-5">Balanced — Sonnet 5.5 (recommended)</option>
+                <option value="claude-haiku-5-5">Fastest — Haiku 5.5 (check categories)</option>
+              </select>
+            </label>
+            <label class="check-row field full"><input id="saRemember" type="checkbox"><span><strong>Remember key on this computer</strong><small>Stored only in this browser. Leave off on shared computers.</small></span></label>
+          </div>
+          <div class="callout info">Each PDF is sent to Anthropic's API to be read. Confirm your agreements allow sharing client bank data this way. All the math and the verdict are calculated here in the page, and every number traces back to the transactions listed under the report.</div>
+
+          <label class="file-drop" id="saDrop">
+            <input id="saFileInput" type="file" accept="application/pdf,.pdf" multiple hidden />
+            <strong>Drop statement PDFs here or click to choose</strong>
+            <small>Any bank. One PDF per statement.</small>
+          </label>
+          <div id="saFiles" class="file-list"></div>
+          <div id="saStatus"></div>
+
+          <div class="actions">
+            <button class="primary-btn" id="saRun">Analyze statements</button>
+            <button class="secondary-btn" id="saAddManual">+ Add month manually</button>
+            <label class="secondary-btn" style="cursor:pointer">Load saved analysis<input id="saLoadInput" type="file" accept=".json,application/json" hidden></label>
+            <button class="secondary-btn" id="saClear">Clear all</button>
+          </div>
+          <div id="saManual"></div>
+        </section>
+
+
+        <section class="panel analyzer-inputs" style="margin-top:20px">
+          <div class="panel-head compact">
+            <div class="step-number">02</div>
+            <div>
+              <h3>Lender match details</h3>
+              <p>What the statements can't show. Used only to match lenders — the analysis above doesn't change.</p>
+            </div>
+          </div>
+          <div class="form-grid lm-inputs">
+            <label class="field"><span>Credit score (FICO) <b style="color:var(--danger)">*</b></span><input id="lmFico" type="number" min="300" max="850" step="1" placeholder="e.g. 620" /></label>
+            <label class="field"><span>Requested amount</span><div class="input-prefix"><span>$</span><input id="lmAmount" type="number" min="0" step="1000" placeholder="Optional" /></div></label>
+            <label class="field"><span>Time in business (months)</span><input id="lmTib" type="number" min="0" step="1" placeholder="Optional" /></label>
+            <label class="field"><span>Business state</span><select id="lmState"></select></label>
+            <label class="field"><span>Industry</span><select id="lmIndustry"></select></label>
+            <label class="field"><span>Previous default</span><select id="lmDefault"><option value="">Not asked yet</option><option value="no">No previous default</option><option value="yes">Yes, has a previous default</option></select></label>
+          </div>
+          <div class="lm-sheet-row">
+            <span id="lmSheetStatus" class="hint"></span>
+            <label class="secondary-btn" style="cursor:pointer">Load updated tier sheet (.csv)<input id="lmSheetInput" type="file" accept=".csv,text/csv" hidden></label>
+            <button class="secondary-btn" id="lmSheetReset">Use built-in sheet</button>
+          </div>
+        </section>
+
+        <div id="saReport" class="report"></div>
+        <div id="saLenders" class="report"></div>
+        <div id="saTxns" class="no-print"></div>
+      </section>
+
+      <!-- LIBRARY -->
+      <section id="library" class="tab-panel">
+        <div class="page-head"><div class="page-head-text"><p class="page-kicker">Reference</p><h1>Product library</h1><p class="lede">Every product in one place: what it is, how it works, who it suits, what to ask and what to collect.</p></div>
+
+          <label class="field library-filter">
+            <span>Filter</span>
+            <select id="libraryFilter">
+              <option>All</option>
+              <option>Financing</option>
+              <option>Business Service</option>
+              <option>Archived / Historical</option>
+            </select>
+          </label></div>
+
+        <div id="libraryList" class="library-grid"></div>
+      </section>
+
+      <!-- PAYOUT -->
+      <section id="payout" class="tab-panel">
+        <div class="page-head"><div class="page-head-text"><p class="page-kicker">Reference</p><h1>Payout estimator</h1><p class="lede">Estimate your share using the actual commission and PSF amounts received.</p></div></div>
+
+        <div class="two-column">
+          <section class="panel">
+            <div class="panel-head compact">
+              <div class="step-number">01</div>
+              <div>
+                <h3>Compensation inputs</h3>
+                <p>Choose the structure that applies to the deal.</p>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <label class="field full">
+                <span>Compensation structure</span>
+                <select id="payoutMode">
+                  <option value="tier1">Tier 1 — 30% commission / 25% PSF</option>
+                  <option value="training">Training — 15% commission / 10% PSF</option>
+                  <option value="custom">Custom</option>
+                </select>
+              </label>
+
+              <label class="field">
+                <span>Commission share (%)</span>
+                <input id="commissionPct" type="number" min="0" step="1" value="30" />
+              </label>
+
+              <label class="field">
+                <span>PSF share (%)</span>
+                <input id="psfPct" type="number" min="0" step="1" value="25" />
+              </label>
+
+              <label class="field">
+                <span>Actual commission received</span>
+                <div class="input-prefix">
+                  <span>$</span>
+                  <input id="totalCommission" type="number" min="0" step="100" value="2500" />
+                </div>
+              </label>
+
+              <label class="field">
+                <span>Actual PSF received</span>
+                <div class="input-prefix">
+                  <span>$</span>
+                  <input id="actualPSF" type="number" min="0" step="100" value="1000" />
+                </div>
+              </label>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-head compact">
+              <div class="step-number">02</div>
+              <div>
+                <h3>Estimated payout</h3>
+                <p>Before clawbacks or other adjustments.</p>
+              </div>
+            </div>
+
+            <div id="payoutOutput"></div>
+
+            <div class="callout warning">
+              <strong>Use actual received figures.</strong> Your signed agreement and current compensation policy control final payout.
+            </div>
+          </section>
+        </div>
+      </section>
+
+      
+      <footer class="footer">
+        <span>Deal Studio</span>
+        <span>Internal training &amp; calculation aid</span>
+        <span>Verify live terms with the lender or provider before quoting a client</span>
+      </footer>
+      </main>
+    </div>
+  </div>
+
+  <script>
+const PRODUCTS = {
+  "Merchant Cash Advance (MCA)": {
+    group:"Financing", status:"Current", source:"Internal training guide",
+    best:"Fast working capital based on future business receivables.",
+    overview:"A merchant cash advance is not a loan. The funder buys a portion of the business's future receivables at a discount and pays the purchase price upfront as a lump sum. The business then remits a fixed daily or weekly amount (or a set percentage of card sales) until the agreed purchased amount has been delivered. Pricing is stated as a factor rate, so the total payback is known on day one.",
+    how:"Approval leans on bank-statement revenue and cash-flow consistency more than on credit score, which is why files with average credit can still qualify. Decisions often come within hours and funding within one to three business days. Terms are short — usually three to twelve months — and existing advances on the account (\"positions\") strongly affect the size and price of any new offer.",
+    bestFor:["Urgent working capital, payroll gaps or inventory buys","Businesses with steady deposits but limited or bruised credit","Short-term opportunities where speed matters more than cost"],
+    watchOuts:["Effective cost is high compared with bank financing","Stacking several advances can choke daily cash flow","The daily or weekly remittance has to fit the client's real balances","Reconciliation rights and default terms differ by contract — read them"],
+    questions:["How much funding do you need?","What will the funds be used for?","How soon do you need it?","What does the business average in monthly revenue?","Do you have existing advances or business debt?"],
+    docs:["Signed application","Recent business bank statements","Closing stipulations requested by underwriting"],
+    note:"Underwriting controls the approved amount, factor rate, term and payment schedule."
+  },
+  "Line of Credit": {
+    group:"Financing", status:"Current", source:"Internal training guide",
+    best:"Reusable access to capital for recurring or uncertain needs.",
+    overview:"A business line of credit gives the client an approved limit they can draw from whenever they need cash. They pay only on what they draw, and as they repay, that amount becomes available again. It works like a safety net that the business controls, rather than a single lump sum.",
+    how:"After approval the client requests draws online, usually funded the same or next business day. Each draw is repaid on a set schedule — often weekly or monthly — with interest or a fee charged only on the outstanding balance. Lenders review the account periodically and may raise, lower or freeze the limit based on performance. Stronger credit, steady revenue and at least a year in business usually lead to better limits.",
+    bestFor:["Recurring needs like inventory cycles or seasonal payroll","A standing cushion for unexpected expenses","Clients who don't know exactly how much they'll need, or when"],
+    watchOuts:["Draw fees and maintenance fees can raise the true cost","Limits can be reduced at review if revenue drops","Rates may be variable","Most lines require a personal guarantee"],
+    questions:["How large a line would be useful?","How much do you expect to draw now?","Is the need recurring?","What is average monthly revenue?","How quickly do you need access?"],
+    docs:["Signed application","Recent business bank statements","Provider-specific items"],
+    note:"Application processes vary by provider."
+  },
+  "Term Loan": {
+    group:"Financing", status:"Current", source:"Internal training guide",
+    best:"Fixed principal with a defined repayment schedule, generally for stronger-credit businesses.",
+    overview:"A term loan delivers a single lump sum that is repaid in fixed installments over a set period, typically six months to five years. Because the payment and payoff date are known upfront, it is easy for the client to budget around, and it is usually much cheaper than short-term advances.",
+    how:"Lenders weigh personal and business credit, time in business, revenue and the business's ability to cover the new payment alongside existing debt. Pricing is quoted as an interest rate or a fixed total cost, sometimes with an origination fee taken from the proceeds. Online lenders can fund in days; banks take longer but are typically cheaper.",
+    bestFor:["A defined, one-time investment — expansion, renovation, a large purchase","Refinancing expensive short-term debt into a predictable payment","Established businesses with fair-to-strong credit"],
+    watchOuts:["Origination fees reduce the net amount received","Check prepayment terms — some loans charge the full cost even if paid early","Collateral (UCC filings) and personal guarantees are common"],
+    questions:["How much do you need?","What will the funds be used for?","What monthly payment can the business support?","Approximate credit profile?","Any prior term loans?"],
+    docs:["Recent business bank statements","Business/personal tax returns","Debt schedule","Personal financial statement"],
+    note:"Application process and underwriting vary by provider."
+  },
+  "SBA Loan": {
+    group:"Financing", status:"Current", source:"Internal training guide",
+    best:"Longer-term financing for qualifying businesses that can tolerate a slower process.",
+    overview:"SBA loans are made by approved lenders and partially guaranteed by the U.S. Small Business Administration. That guarantee lets lenders offer some of the lowest rates and longest terms available to small businesses. The most common programs are the 7(a) loan for general purposes and the 504 loan for real estate and major equipment.",
+    how:"Underwriting is thorough: lenders look at credit, cash flow, profitability, collateral and tax returns, and every owner with 20% or more typically signs a personal guarantee. Working-capital and equipment loans can run up to ten years and real-estate loans up to twenty-five years, keeping payments low. Expect weeks to a few months from application to closing.",
+    bestFor:["Established, profitable businesses that can wait for funding","Buying real estate, buying a business, or refinancing costly debt","Owners who want the lowest long-term payment"],
+    watchOuts:["The timeline is long — not for urgent needs","Documentation is heavy and eligibility rules are strict","Guarantee fees and closing costs apply","Collateral and personal guarantees are standard"],
+    questions:["Requested amount?","Use of proceeds?","Time in business?","Credit profile?","Can the client wait for longer underwriting?"],
+    docs:["Lender application","Business financials","Tax returns","Ownership/personal financial information","Closing checklist items"],
+    note:"Use the current lender-approved rate, fees and term; don't rely on older examples."
+  },
+  "Equipment Financing": {
+    group:"Financing", status:"Current", source:"Internal training guide",
+    best:"Buying equipment or borrowing against eligible equipment.",
+    overview:"Equipment financing pays for machinery, vehicles, technology or other hard assets, with the equipment itself serving as collateral. Because the lender can recover the asset, approvals are often easier and rates lower than unsecured options. It can also unlock cash from equipment the business already owns.",
+    how:"Financing can cover most or all of the purchase price, with terms set around the equipment's useful life — commonly two to seven years. Options include a straightforward loan, a lease with a fixed or fair-market-value buyout, or a sale-leaseback on owned equipment. Lenders review the equipment's age, value and resale market alongside the business's credit and revenue.",
+    bestFor:["Purchasing new or used equipment and vehicles","Spreading the cost of a major asset over its working life","Raising capital against equipment the business already owns"],
+    watchOuts:["Older or specialized equipment can be harder to finance","Weaker credit may need a down payment","Private-party purchases need extra documentation","Tax treatment depends on loan vs lease — the client should ask their accountant"],
+    questions:["Buying equipment or borrowing against owned equipment?","Equipment price/value?","Age/condition?","Vendor invoice or appraisal?","Comfortable monthly payment?"],
+    docs:["YTD bank statements/financials","Tax returns","Debt schedule","Equipment appraisal/vendor documentation"],
+    note:"Pricing depends on the equipment, the borrower and lender underwriting."
+  },
+  "Mortgage Financing": {
+    group:"Financing", status:"Current", source:"Internal training guide",
+    best:"Commercial property financing or capital secured by eligible commercial real estate.",
+    overview:"Commercial mortgage financing helps a client buy, refinance or pull equity from commercial property — an owner-occupied building, a mixed-use property or an income-producing investment. Because the loan is secured by real estate, it offers long terms and comparatively low rates, and a cash-out refinance can fund other parts of the business.",
+    how:"Lenders size the loan from the property's value and its ability to cover the payment, typically lending a percentage of appraised value and requiring a minimum debt-service coverage ratio. Terms often run five to twenty-five years, sometimes with a longer amortization and a balloon payment at maturity. Bridge loans cover short-term needs while a property is repositioned or sold.",
+    bestFor:["Buying or refinancing commercial property","Releasing equity to fund the business","Clients who want long-term, lower-cost capital tied to real estate"],
+    watchOuts:["Appraisal, environmental and legal costs add up before closing","Prepayment penalties are common","Closings take weeks","Balloon payments need a refinance plan"],
+    questions:["Purchasing or already own the property?","Property value/purchase price?","Requested loan amount?","Income-producing?","Existing mortgage balance?"],
+    docs:["Property financials","Appraisal/BOV if required","Tax returns","Personal/business financials"],
+    note:"Use an actual lender-approved rate, term, fees and amortization structure."
+  },
+  "Factoring": {
+    group:"Financing", status:"Current", source:"Internal training guide",
+    best:"B2B businesses waiting to be paid on eligible invoices.",
+    overview:"Factoring turns unpaid invoices into cash now. The business sells its outstanding B2B invoices to a factoring company, receives most of the invoice value upfront, and gets the remainder — minus the factor's fee — once its customer pays. It's built for companies that do the work today but wait thirty to ninety days to get paid.",
+    how:"The factor typically advances a large share of each invoice's face value and charges a fee based on how long the invoice stays open. Approval depends mostly on the creditworthiness of the client's customers, not the client's own credit. Arrangements can be recourse (the client buys back unpaid invoices) or non-recourse, and customers are usually told to pay the factor directly.",
+    bestFor:["Staffing, trucking, security, wholesale and other B2B firms","Fast-growing companies whose cash is tied up in receivables","Businesses with creditworthy customers but thin cash"],
+    watchOuts:["The factor files a UCC on receivables, which can block other funding","Customers will usually know an invoice was factored","Minimum volumes or long contracts may apply","Fees compound the longer customers take to pay"],
+    questions:["Invoice face amount?","Who owes the invoice and when is it due?","B2B?","Advance percentage?","Provider fee schedule?"],
+    docs:["Sample invoice","Accounts receivable aging report","Provider-specific items"],
+    note:"There's no universal factoring fee formula; use the provider's quote."
+  },
+  "P.O. Financing": {
+    group:"Financing", status:"Current", source:"Internal training guide",
+    best:"Capital to fulfill eligible outstanding purchase orders.",
+    overview:"Purchase-order financing lets a business accept orders it couldn't otherwise afford to fill. The funder pays the client's supplier directly so the goods can be produced or shipped to the end customer. It's designed for resellers and distributors who win large orders but lack the cash to buy the inventory.",
+    how:"The funder reviews the purchase order, the end customer's credit and the supplier's reliability, then pays the supplier — often by letter of credit or direct wire. Once goods are delivered and invoiced, the customer's payment (frequently routed through a factoring arrangement) repays the funder, and the client keeps the margin. Healthy gross margins are usually required for the deal to work.",
+    bestFor:["Distributors, importers and resellers of finished goods","One-time large orders that exceed working capital","Businesses with creditworthy customers and dependable suppliers"],
+    watchOuts:["Generally not for service businesses or labor-heavy manufacturing","Thin margins can disappear in fees","Delays at the supplier extend the cost"],
+    questions:["PO amount?","Supplier/fulfillment cost?","Amount provider will finance?","Time until customer payment?","Provider fee?"],
+    docs:["Unfulfilled purchase order(s)","Financial statements","Provider-specific items"],
+    note:"There's no universal pricing formula; use the actual provider quote."
+  },
+  "Credit Card Processing": {
+    group:"Business Service", status:"Current", source:"Internal training guide",
+    best:"Comparing payment-processing costs and services.",
+    overview:"Card processing is the service that lets a business accept credit and debit payments in store, online or on the go. Many merchants overpay because pricing is hard to read. A statement review compares what they pay today with a new quote and shows the real monthly difference.",
+    how:"Start with the merchant's latest processing statement and calculate their effective rate — total fees divided by total card volume. Compare it with the proposed pricing model (interchange-plus, tiered or flat rate), monthly fees and any equipment or gateway costs. The savings only count once both sides are compared on the same volume.",
+    bestFor:["Merchants with meaningful monthly card volume","Businesses on legacy tiered pricing or with many add-on fees","Clients adding online, mobile or new POS needs"],
+    watchOuts:["Early-termination fees and equipment leases on the current contract","PCI compliance and monthly minimum fees","Never promise savings before the statement is analyzed"],
+    questions:["Monthly processing volume?","Current effective rate?","Fixed fees?","Online/POS needs?"],
+    docs:["Recent processing statement","Current fee schedule","Proposed partner quote"],
+    note:"Don't promise savings until the merchant statement and actual quote are compared."
+  },
+  "Bookkeeping": {
+    group:"Business Service", status:"Current", source:"Internal product list",
+    best:"Recurring bookkeeping and financial reporting support.",
+    overview:"Bookkeeping keeps a business's financial records accurate and current: transactions categorized, accounts reconciled and statements produced every month. Clean books make tax time easier, help owners see where money goes, and make the business far stronger when it applies for financing.",
+    how:"The provider connects to the client's bank and card accounts, categorizes transactions, reconciles each account and delivers monthly reports such as a profit-and-loss statement and balance sheet. Many also offer catch-up work for businesses that have fallen behind. Pricing is usually monthly, based on transaction volume and number of accounts.",
+    bestFor:["Owners doing their own books, or not doing them at all","Businesses preparing for bank or SBA financing","Companies that need clean statements for tax filing"],
+    watchOuts:["Confirm scope — accounts, entities, payroll and tax filing may cost extra","Catch-up work is priced separately","Make sure the client keeps ownership of their accounting file"],
+    questions:["Current bookkeeping cost?","How many entities/accounts?","What monthly statements are required?"],
+    docs:["Scope of work","Current cost","Provider quote"],
+    note:"Calculate from the actual provider quote."
+  },
+  "HR / Payroll": {
+    group:"Business Service", status:"Current", source:"Internal training guide",
+    best:"Payroll, HR, tax, benefits and employee administration support.",
+    overview:"Payroll and HR services take employee administration off the owner's plate: paying staff on time, filing payroll taxes, issuing year-end forms and keeping up with employment rules. Some providers add benefits, onboarding and HR support so a small business can offer what larger employers do.",
+    how:"The provider runs each payroll, calculates and remits withholding, files quarterly and annual returns and produces W-2s and 1099s. Options range from a payroll-only service to a PEO, which co-employs staff to give access to group benefits. Pricing is typically a base fee plus a per-employee charge.",
+    bestFor:["Growing teams where payroll errors are becoming costly","Owners spending hours on payroll and compliance","Businesses wanting to offer benefits"],
+    watchOuts:["Switching providers mid-quarter complicates tax filings","A PEO involves a co-employment arrangement","Benefits and HR add-ons change the price significantly"],
+    questions:["Employee count?","Payroll frequency?","Current provider cost?","Required HR/benefit services?"],
+    docs:["Current payroll invoice","Employee count/frequency","Provider quote"],
+    note:"Pricing is provider-specific."
+  },
+  "SEO / Web Development": {
+    group:"Business Service", status:"Current", source:"Internal training guide",
+    best:"Search visibility, website and digital growth services.",
+    overview:"Web development and SEO help a business get found and win customers online. That can mean building or rebuilding the website, improving local search rankings, optimizing the Google Business Profile, and producing content that brings in steady inbound leads.",
+    how:"Work usually starts with an audit of the current site and search presence, then a setup or build phase, followed by a monthly retainer for ongoing optimization and reporting. Search results build over months, not weeks, so success is measured by traffic, rankings and leads over time.",
+    bestFor:["Businesses with no website or an outdated one","Local businesses that depend on search and maps traffic","Owners ready to invest in steady lead flow"],
+    watchOuts:["Be wary of any guaranteed ranking promises","The client should own their domain, site and accounts","Results take months to show"],
+    questions:["Existing website?","Primary marketing goal?","SEO, web development or both?","Setup fee and monthly retainer?"],
+    docs:["Scope of services","Website/domain information","Provider quote"],
+    note:"Use actual quoted service pricing."
+  },
+  "Business Advisory": {
+    group:"Business Service", status:"Current", source:"Internal product list",
+    best:"Advisory engagements priced by scope.",
+    overview:"Business advisory brings in experienced guidance for a specific challenge: restructuring expensive debt, planning cash flow, preparing a business to qualify for bank or SBA financing, or mapping out a growth plan. It's useful when a client's problem is bigger than any single product.",
+    how:"Engagements start with a defined scope and outcome, then run as a one-time project, a monthly retainer, or a combination — sometimes with a success fee tied to a result such as a closed financing. Clear deliverables and timelines keep the work accountable.",
+    bestFor:["Clients stuck in a cycle of short-term debt","Businesses preparing for larger, cheaper financing","Owners planning expansion or a major change"],
+    watchOuts:["Put deliverables and timelines in writing","Spell out how any success fee is calculated","Advisory doesn't guarantee approval by any lender"],
+    questions:["Desired outcome?","Project, retainer or success-fee pricing?","Engagement term?"],
+    docs:["Scope of work","Fee agreement","Success-fee terms if any"],
+    note:"Calculate from the actual agreement."
+  },
+  "Credit Servicing / Credit Repair": {
+    group:"Business Service", status:"Reference", source:"Internal training guide",
+    best:"Helping merchants improve credit profile before seeking better financing.",
+    overview:"Credit servicing helps a business owner improve the credit profile lenders see. That can include disputing inaccurate or outdated items on personal reports, lowering utilization, and building a business credit file with the commercial bureaus so future financing doesn't rest entirely on personal credit.",
+    how:"The provider reviews the reports, disputes errors with the bureaus, recommends steps such as paying down balances, and helps establish business tradelines. Improvement takes months and depends on the client's own payment behavior. Credit repair is regulated, so contracts, disclosures and billing must follow federal and state rules.",
+    bestFor:["Clients declined or priced up because of credit","Owners with errors or outdated items on their reports","Businesses that want to qualify for cheaper financing later"],
+    watchOuts:["Never guarantee a score increase or timeline","Federal law limits charging for credit repair before services are performed","Written contracts and cancellation rights are required"],
+    questions:["Approximate score?","Declined because of credit?","Quoted setup/monthly fee?","Service term?"],
+    docs:["Credit-service agreement","Provider quote","Required authorization/disclosures"],
+    note:"Don't guarantee a score increase or timing."
+  },
+  "ERTC / ERC (Archived)": {
+    group:"Archived / Historical", status:"Archived", source:"Internal training guide",
+    best:"Historical reference only.",
+    overview:"The Employee Retention Credit was a refundable payroll tax credit created during the pandemic for businesses that kept employees on payroll through shutdowns or revenue declines in 2020 and 2021. It is kept here for reference only and should not be offered to clients.",
+    how:"Eligible employers claimed the credit by amending payroll tax returns for qualifying quarters. The IRS later paused processing, increased scrutiny of claims, and the filing windows have closed.",
+    bestFor:["Answering a client's questions about a past claim"],
+    watchOuts:["Do not market or file new ERC claims","Clients with questions about an existing claim should speak to their tax professional"],
+    questions:[], docs:[],
+    note:"The retroactive claim period ran through April 15, 2025."
+  }
+};
+
+const ORDER = Object.keys(PRODUCTS);
+
+const money = v => Number(v || 0).toLocaleString("en-US", {style:"currency",currency:"USD",minimumFractionDigits:2,maximumFractionDigits:2});
+const pct = (v,n=2) => `${Number(v||0).toFixed(n)}%`;
+const num = id => Number(document.getElementById(id)?.value || 0);
+const val = id => document.getElementById(id)?.value || "";
+const checked = id => !!document.getElementById(id)?.checked;
+const safeDiv = (a,b) => b ? a/b : 0;
+
+function amortPayment(principal, annualRatePct, months){
+  if(principal<=0 || months<=0) return 0;
+  const r = annualRatePct / 100 / 12;
+  if(r===0) return principal / months;
+  return principal * (r*Math.pow(1+r,months)) / (Math.pow(1+r,months)-1);
+}
+
+function field(label,id,value,step="any",extra="",help=""){
+  return `
+    <label class="field">
+      <span>${label}</span>
+      <input id="${id}" type="number" value="${value}" step="${step}" ${extra}>
+      ${help ? `<small>${help}</small>` : ""}
+    </label>`;
+}
+
+function selectField(label,id,options,help=""){
+  return `
+    <label class="field">
+      <span>${label}</span>
+      <select id="${id}">${options.map(x=>`<option>${x}</option>`).join("")}</select>
+      ${help ? `<small>${help}</small>` : ""}
+    </label>`;
+}
+
+function section(title, subtitle, inner){
+  return `
+    <div class="section-block">
+      <div class="section-block-title">
+        <h4>${title}</h4>
+        ${subtitle ? `<span>${subtitle}</span>` : ""}
+      </div>
+      <div class="form-grid">${inner}</div>
+    </div>`;
+}
+
+function heroKpi(label,value,sub){
+  return `<div class="kpi-hero"><div class="label">${label}</div><div class="value">${value}</div><div class="sub">${sub}</div></div>`;
+}
+
+function kpiGrid(items){
+  return `<div class="kpi-grid">${items.map(([label,value,sub])=>`
+    <div class="kpi">
+      <div class="label">${label}</div>
+      <div class="value">${value}</div>
+      <div class="sub">${sub}</div>
+    </div>`).join("")}</div>`;
+}
+
+const TEXTS = {};
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+function summaryBox(text,key="calc"){
+  TEXTS[key]=text;
+  return `
+    <div class="client-summary">
+      <div class="summary-title">Client-ready explanation</div>
+      <p>${esc(text)}</p>
+    </div>
+    <div class="actions">
+      <button class="primary-btn" onclick="copyStored('${key}')">Copy summary</button>
+      <button class="secondary-btn" onclick="downloadStored('${key}','deal_summary.txt')">Download</button>
+    </div>`;
+}
+function copyStored(key){ copyText(TEXTS[key]||""); }
+function downloadStored(key,filename){ downloadText(filename,TEXTS[key]||""); }
+
+function copyText(text){
+  const fallback=()=>{
+    const t=document.createElement("textarea");
+    t.value=text; document.body.appendChild(t); t.select();
+    try{ document.execCommand("copy"); alert("Copied to clipboard"); }catch(e){ alert("Copy failed — select the text manually."); }
+    t.remove();
+  };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(()=>alert("Copied to clipboard"), fallback);
+  } else fallback();
+}
+
+function downloadText(filename,text){
+  const blob = new Blob([text], {type:"text/plain"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function productMeta(product){
+  const p = PRODUCTS[product];
+  document.getElementById("productMeta").innerHTML = `
+    <span class="pill">${p.group}</span>
+    <span class="pill">${p.status}</span>
+    <span class="source-pill">${p.source}</span>
+    <div class="hint" style="width:100%;margin-top:3px">${p.best}</div>`;
+}
+
+function attachCalcListeners(){
+  document.querySelectorAll("#productInputs input,#productInputs select").forEach(el=>{
+    el.addEventListener("input",calculate);
+    el.addEventListener("change",calculate);
+  });
+}
+
+function renderInputs(){
+  const p = val("productSelect");
+  productMeta(p);
+  const root = document.getElementById("productInputs");
+
+  if(p==="ERTC / ERC (Archived)"){
+    root.innerHTML = `<div class="callout warning"><strong>Archived only.</strong> No calculator is provided for this historical program.</div>`;
+    document.getElementById("dealOutput").innerHTML = `<div class="callout warning">${PRODUCTS[p].note}</div>`;
+    return;
+  }
+
+  let html = "";
+
+  if(p==="Merchant Cash Advance (MCA)"){
+    html += section("Core deal terms","Client-facing",
+      field("Funding amount","mcaFunding","25000","1000",'min="0"')+
+      field("Factor / sell rate","mcaFactor","1.35","0.01",'min="1"')+
+      field("Number of payments","mcaPayments","140","5",'min="1"')+
+      selectField("Payment frequency","mcaFrequency",["Daily (business days)","Weekly","Biweekly","Monthly"])
+    );
+    html += section("Fees","Only if applicable",
+      field("Origination / underwriting fee","mcaOrigination","0","100",'min="0"')+
+      field("Professional service fee (PSF)","mcaPSF","0","100",'min="0"')+
+      field("Other deducted fees","mcaOther","0","100",'min="0"')
+    );
+    html += `<details class="advanced"><summary>Internal / advanced fields</summary><div class="form-grid">${
+      field("Buy rate","mcaBuy","0","0.01",'min="0"',"Internal only. Leave 0 if unknown.")
+    }</div></details>`;
+  }
+
+  else if(p==="Line of Credit"){
+    html += section("Line & draw","Core terms",
+      field("Approved credit limit","locLimit","50000","1000",'min="0"')+
+      field("Current draw amount","locDraw","20000","1000",'min="0"')+
+      field("Draw term (weeks)","locWeeks","26","1",'min="1"')
+    );
+    html += section("Pricing","Use provider terms",
+      selectField("Pricing method","locMethod",["APR / annual rate","Weekly simple rate","Fixed simple rate for draw term"])+
+      field("Rate (%)","locRate","12","0.25",'min="0"')+
+      field("Draw fee (%)","locDrawFee","0","0.25",'min="0"')+
+      field("Other fixed fee","locFixed","0","100",'min="0"')
+    );
+  }
+
+  else if(["Term Loan","SBA Loan"].includes(p)){
+    html += section("Loan terms","Core terms",
+      field("Principal / loan amount","loanPrincipal","100000","5000",'min="0"')+
+      field("Annual interest rate (%)","loanRate","10","0.25",'min="0"')+
+      field("Term (years)","loanYears",p==="SBA Loan"?"10":"5","0.25",'min="0.25"')
+    );
+    html += section("Fees & structure","Advanced",
+      field("Origination / closing fee (%)","loanOrigPct","0","0.25",'min="0"')+
+      field("Other fees","loanOther","0","100",'min="0"')+
+      field("Balloon payment (optional)","loanBalloon","0","1000",'min="0"')+
+      `<label class="check-row"><input id="loanFinanceFees" type="checkbox"><span><strong>Finance entered fees</strong><small>Add fees to financed principal</small></span></label>`
+    );
+  }
+
+  else if(p==="Equipment Financing"){
+    html += section("Equipment & financing","Core terms",
+      field("Equipment purchase price / value","eqValue","100000","5000",'min="0"')+
+      field("Down payment","eqDown","10000","1000",'min="0"')+
+      field("Annual interest rate (%)","eqRate","10","0.25",'min="0"')+
+      field("Term (years)","eqYears","5","0.25",'min="0.25"')
+    );
+    html += section("Fees","If applicable",
+      field("Origination / closing fee (%)","eqOrigPct","0","0.25",'min="0"')+
+      field("Other fees","eqOther","0","100",'min="0"')+
+      `<label class="check-row"><input id="eqFinanceFees" type="checkbox"><span><strong>Finance entered fees</strong><small>Add fees to financed principal</small></span></label>`
+    );
+  }
+
+  else if(p==="Mortgage Financing"){
+    html += section("Property & loan","Core terms",
+      field("Property value / purchase price","mtgValue","750000","10000",'min="0"')+
+      field("Loan amount","mtgPrincipal","500000","10000",'min="0"')+
+      field("Annual interest rate (%)","mtgRate","10","0.25",'min="0"')+
+      field("Term (years)","mtgYears","10","0.25",'min="0.25"')
+    );
+    html += section("Fees","If applicable",
+      field("Origination / closing fee (%)","mtgOrigPct","0","0.25",'min="0"')+
+      field("Other fees","mtgOther","0","100",'min="0"')+
+      `<label class="check-row"><input id="mtgFinanceFees" type="checkbox"><span><strong>Finance entered fees</strong><small>Add fees to financed principal</small></span></label>`
+    );
+  }
+
+  else if(p==="Factoring"){
+    html += section("Invoice","Core terms",
+      field("Invoice face amount","factInvoice","100000","5000",'min="0"')+
+      field("Advance rate (%)","factAdvance","80","1",'min="0" max="100"')+
+      field("Expected days until customer payment","factDays","45","5",'min="1"')
+    );
+    html += section("Provider pricing","Use actual quote",
+      field("Provider fee per 30 days (%)","factFee30","2","0.1",'min="0"')+
+      selectField("Fee applies to","factBase",["Invoice face amount","Amount advanced"])+
+      field("Other factoring fees","factOther","0","100",'min="0"')
+    );
+  }
+
+  else if(p==="P.O. Financing"){
+    html += section("Purchase order","Transaction",
+      field("Customer PO value","poValue","150000","5000",'min="0"')+
+      field("Supplier / fulfillment cost","poSupplier","90000","5000",'min="0"')+
+      field("Amount financed by provider","poFinanced","80000","5000",'min="0"')
+    );
+    html += section("Provider pricing","Use actual quote",
+      field("Provider fee (%)","poFeePct","3","0.25",'min="0"')+
+      field("Number of fee periods","poPeriods","1","1",'min="1"')+
+      field("Other fees","poOther","0","100",'min="0"')
+    );
+  }
+
+  else if(p==="Credit Card Processing"){
+    html += section("Current processing","Merchant statement",
+      field("Monthly card-processing volume","ccVolume","100000","5000",'min="0"')+
+      field("Current effective rate (%)","ccCurrentRate","3","0.05",'min="0"')+
+      field("Current fixed monthly fees","ccCurrentFixed","100","25",'min="0"')
+    );
+    html += section("Proposed pricing","Partner quote",
+      field("Proposed effective rate (%)","ccProposedRate","2.6","0.05",'min="0"')+
+      field("Proposed fixed monthly fees","ccProposedFixed","75","25",'min="0"')+
+      field("One-time setup/equipment cost","ccSetup","0","100",'min="0"')
+    );
+  }
+
+  else if(p==="HR / Payroll"){
+    html += section("Company","Scope",
+      field("Employees","payEmployees","20","1",'min="0"')+
+      field("Payroll runs per month","payRuns","2","1",'min="1"')
+    );
+    html += section("Pricing","Provider quote",
+      field("Base monthly service fee","payBase","100","25",'min="0"')+
+      field("Per employee / payroll-run fee","payPerEmp","5","0.5",'min="0"')+
+      field("Setup fee","paySetup","0","100",'min="0"')+
+      field("Current monthly provider cost (optional)","payCurrent","0","50",'min="0"')
+    );
+  }
+
+  else if(p==="Business Advisory"){
+    html += section("Engagement","Scope",
+      field("Project / advisory fee","advProject","2500","250",'min="0"')+
+      field("Monthly retainer","advRetainer","1000","100",'min="0"')+
+      field("Engagement months","advMonths","6","1",'min="1"')
+    );
+    html += section("Success fee","Optional",
+      field("Success-fee base","advBase","0","5000",'min="0"')+
+      field("Success fee (%)","advPct","0","0.25",'min="0"')
+    );
+  }
+
+  else {
+    html += section("Service pricing","Quote",
+      field("One-time / setup fee","svcSetup","500","100",'min="0"')+
+      field("Monthly fee / retainer","svcMonthly","500","100",'min="0"')+
+      field("Service term (months)","svcMonths","6","1",'min="1"')+
+      field("Other one-time fee","svcOther","0","100",'min="0"')
+    );
+    html += section("Comparison","Optional",
+      field("Current monthly cost","svcCurrent","0","100",'min="0"')
+    );
+  }
+
+  root.innerHTML = html;
+  attachCalcListeners();
+  calculate();
+}
+
+function calculate(){
+  const p = val("productSelect");
+  if(p==="ERTC / ERC (Archived)") return;
+  const out = document.getElementById("dealOutput");
+  const client = val("clientName").trim() || "the business";
+
+  let html = "";
+  let summary = "";
+
+  if(p==="Merchant Cash Advance (MCA)"){
+    const funding=num("mcaFunding"), factor=num("mcaFactor"), payments=num("mcaPayments");
+    const freq=val("mcaFrequency"), orig=num("mcaOrigination"), psf=num("mcaPSF"), other=num("mcaOther"), buy=num("mcaBuy");
+    const payback=funding*factor, payment=safeDiv(payback,payments), fees=orig+psf+other, net=funding-fees, cost=payback-funding;
+    const spread=buy>0 ? funding*Math.max(0,factor-buy) : 0;
+
+    html += heroKpi("Estimated payment", money(payment), `${Math.round(payments)} ${freq.toLowerCase()} payments`);
+    html += kpiGrid([
+      ["Gross funding",money(funding),"Before deducted fees"],
+      ["Net proceeds",money(net),"After entered fees"],
+      ["Total payback",money(payback),"Funding × factor"],
+      ["Financing cost",money(cost),"Payback − funding"]
+    ]);
+
+    if(buy>0){
+      html += `<div class="callout info"><strong>Internal spread:</strong> ${(factor-buy).toFixed(3)} points / ${money(spread)}. Use the actual commission statement for payout.</div>`;
+    }
+    if(freq==="Daily (business days)"){
+      html += `<div class="callout info">${Math.round(payments)} business-day payments ≈ ${(payments/20).toFixed(1)} months using ~20 business days/month.</div>`;
+    }
+
+    summary = `${client} would receive ${money(funding)} in gross funding. After the entered deducted fees, estimated net proceeds are ${money(net)}. At a ${factor.toFixed(3)} factor, total scheduled payback is ${money(payback)}, with ${Math.round(payments)} ${freq.toLowerCase()} payments of approximately ${money(payment)} each. These are calculations of entered terms, not an underwriting approval.`;
+  }
+
+  else if(p==="Line of Credit"){
+    const limit=num("locLimit"), draw=Math.min(num("locDraw"),limit || num("locDraw"));
+    const method=val("locMethod"), weeks=num("locWeeks"), rate=num("locRate"), drawFeePct=num("locDrawFee"), fixed=num("locFixed");
+    const drawFee=draw*drawFeePct/100;
+    let interest=0;
+    if(method==="APR / annual rate") interest=draw*(rate/100)*(weeks/52);
+    else if(method==="Weekly simple rate") interest=draw*(rate/100)*weeks;
+    else interest=draw*(rate/100);
+    const cost=interest+drawFee+fixed, repay=draw+cost, weekly=safeDiv(repay,weeks);
+
+    html += heroKpi("Weekly equivalent",money(weekly),`Across ${Math.round(weeks)} weeks`);
+    html += kpiGrid([
+      ["Credit limit",money(limit),"Approved maximum entered"],
+      ["Current draw",money(draw),"Amount used now"],
+      ["Estimated cost",money(cost),"Interest + fees"],
+      ["Total repayment",money(repay),"For this draw"]
+    ]);
+
+    summary = `For the entered line-of-credit terms, the approved limit is ${money(limit)} and the current draw is ${money(draw)}. Estimated cost for this draw is ${money(cost)}, producing total repayment of ${money(repay)} over ${Math.round(weeks)} weeks. Actual pricing and repayment rules come from the provider approval.`;
+  }
+
+  else if(["Term Loan","SBA Loan"].includes(p)){
+    const principal=num("loanPrincipal"), rate=num("loanRate"), years=num("loanYears");
+    const months=Math.max(1,Math.round(years*12)), fee=principal*num("loanOrigPct")/100+num("loanOther");
+    const finance=checked("loanFinanceFees"), balloon=num("loanBalloon");
+    const amortPrincipal=Math.max(0,(finance?principal+fee:principal)-balloon);
+    const monthly=amortPayment(amortPrincipal,rate,months), totalPI=monthly*months;
+    const interest=Math.max(0,totalPI-amortPrincipal), repay=totalPI+balloon+(finance?0:fee), net=finance?principal:principal-fee;
+
+    html += heroKpi("Estimated monthly payment",money(monthly),`${months} monthly payments`);
+    html += kpiGrid([
+      ["Principal",money(principal),"Entered amount"],
+      ["Net proceeds",money(net),"If fees are deducted"],
+      ["Total interest",money(interest),"Amortization estimate"],
+      ["Total repayment",money(repay),"Payments + fees/balloon"]
+    ]);
+
+    if(p==="SBA Loan"){
+      html += `<div class="callout warning">Use current lender-approved SBA pricing. The supplied training manual contains older rate examples.</div>`;
+    }
+
+    summary = `Based on the entered ${p.toLowerCase()} terms, principal is ${money(principal)} at ${rate.toFixed(2)}% over ${years} years. Estimated monthly principal-and-interest payment is ${money(monthly)}. Entered fees total ${money(fee)} and estimated total repayment is ${money(repay)}. This is an amortization estimate; the lender approval controls.`;
+  }
+
+  else if(p==="Equipment Financing"){
+    const value=num("eqValue"), down=num("eqDown"), principal=Math.max(0,value-down);
+    const rate=num("eqRate"), years=num("eqYears"), months=Math.max(1,Math.round(years*12));
+    const fee=principal*num("eqOrigPct")/100+num("eqOther"), finance=checked("eqFinanceFees");
+    const amortPrincipal=finance?principal+fee:principal;
+    const monthly=amortPayment(amortPrincipal,rate,months), totalPI=monthly*months;
+    const interest=Math.max(0,totalPI-amortPrincipal), repay=totalPI+(finance?0:fee);
+
+    html += heroKpi("Estimated monthly payment",money(monthly),`${months} monthly payments`);
+    html += kpiGrid([
+      ["Financed principal",money(principal),"Value − down payment"],
+      ["Down payment",money(down),"Entered amount"],
+      ["Total interest",money(interest),"Amortization estimate"],
+      ["Total repayment",money(repay),"Payments + non-financed fees"]
+    ]);
+
+    summary = `Based on the entered equipment-financing terms, ${money(principal)} is financed at ${rate.toFixed(2)}% over ${years} years. Estimated monthly payment is ${money(monthly)} with ${money(fee)} in entered fees. This is an estimate; the lender approval controls.`;
+  }
+
+  else if(p==="Mortgage Financing"){
+    const value=num("mtgValue"), principal=num("mtgPrincipal"), rate=num("mtgRate"), years=num("mtgYears");
+    const months=Math.max(1,Math.round(years*12)), fee=principal*num("mtgOrigPct")/100+num("mtgOther"), finance=checked("mtgFinanceFees");
+    const amortPrincipal=finance?principal+fee:principal;
+    const monthly=amortPayment(amortPrincipal,rate,months), totalPI=monthly*months;
+    const interest=Math.max(0,totalPI-amortPrincipal), repay=totalPI+(finance?0:fee), ltv=safeDiv(principal,value)*100;
+
+    html += heroKpi("Estimated monthly payment",money(monthly),`${months} monthly payments`);
+    html += kpiGrid([
+      ["Loan amount",money(principal),"Entered principal"],
+      ["Loan-to-value",pct(ltv,1),"Principal ÷ property value"],
+      ["Total interest",money(interest),"Amortization estimate"],
+      ["Total repayment",money(repay),"Payments + non-financed fees"]
+    ]);
+
+    summary = `Based on the entered mortgage-financing terms, ${money(principal)} is financed against a ${money(value)} property value at ${rate.toFixed(2)}% over ${years} years. Estimated monthly payment is ${money(monthly)} and LTV is ${ltv.toFixed(1)}%. The lender approval controls.`;
+  }
+
+  else if(p==="Factoring"){
+    const invoice=num("factInvoice"), advPct=num("factAdvance"), days=num("factDays"), fee30=num("factFee30"), feeBase=val("factBase"), other=num("factOther");
+    const advance=invoice*advPct/100, reserve=invoice-advance;
+    const base=feeBase==="Invoice face amount"?invoice:advance;
+    const factFee=base*(fee30/100)*(days/30), totalFee=factFee+other, release=Math.max(0,reserve-totalFee), cash=advance+release;
+
+    html += heroKpi("Initial advance",money(advance),`${advPct.toFixed(1)}% of invoice`);
+    html += kpiGrid([
+      ["Invoice face amount",money(invoice),"Entered invoice"],
+      ["Initial reserve",money(reserve),"Held before collection"],
+      ["Estimated factor fee",money(factFee),`${Math.round(days)} days`],
+      ["Estimated reserve release",money(release),"After entered fees"]
+    ]);
+
+    summary = `A ${money(invoice)} invoice would produce an initial advance of about ${money(advance)}. Using the provider pricing entered, estimated fees over ${Math.round(days)} days are ${money(totalFee)}, with an estimated reserve release of ${money(release)} after collection. Use the provider's actual factoring quote.`;
+  }
+
+  else if(p==="P.O. Financing"){
+    const po=num("poValue"), supplier=num("poSupplier"), financed=num("poFinanced"), feePct=num("poFeePct"), periods=num("poPeriods"), other=num("poOther");
+    const fee=financed*feePct/100*periods+other, marginBefore=po-supplier, marginAfter=marginBefore-fee, marginPct=safeDiv(marginAfter,po)*100;
+
+    html += heroKpi("Margin after financing",money(marginAfter),`${marginPct.toFixed(1)}% of PO value`);
+    html += kpiGrid([
+      ["PO value",money(po),"Customer order"],
+      ["Financed amount",money(financed),"Provider-funded amount"],
+      ["Financing cost",money(fee),"Entered provider fees"],
+      ["Margin before financing",money(marginBefore),"PO − supplier cost"]
+    ]);
+
+    summary = `The entered PO is ${money(po)} with ${money(supplier)} in fulfillment cost. The provider finances ${money(financed)} and entered financing fees total about ${money(fee)}. Estimated transaction margin after those financing fees is ${money(marginAfter)} before other operating costs.`;
+  }
+
+  else if(p==="Credit Card Processing"){
+    const vol=num("ccVolume"), currentRate=num("ccCurrentRate"), currentFixed=num("ccCurrentFixed");
+    const proposedRate=num("ccProposedRate"), proposedFixed=num("ccProposedFixed"), setup=num("ccSetup");
+    const current=vol*currentRate/100+currentFixed, proposed=vol*proposedRate/100+proposedFixed;
+    const save=current-proposed, annual=save*12-setup, breakeven=save>0?safeDiv(setup,save):0;
+
+    html += heroKpi("Estimated monthly difference",money(save),save>=0?"Positive = savings":"Negative = higher cost");
+    html += kpiGrid([
+      ["Current monthly cost",money(current),"Entered statement"],
+      ["Proposed monthly cost",money(proposed),"Entered quote"],
+      ["Annual difference",money(annual),"After setup cost"],
+      ["Break-even",breakeven?`${breakeven.toFixed(1)} mo`:"N/A","If savings are positive"]
+    ]);
+
+    summary = `At ${money(vol)} in monthly card volume, current entered pricing costs about ${money(current)} per month. Proposed entered pricing costs about ${money(proposed)} per month, a difference of ${money(save)} monthly. Verify against the merchant's actual processing statement and partner quote.`;
+  }
+
+  else if(p==="HR / Payroll"){
+    const employees=num("payEmployees"), runs=num("payRuns"), base=num("payBase"), perEmp=num("payPerEmp"), setup=num("paySetup"), current=num("payCurrent");
+    const monthly=base+employees*runs*perEmp, firstYear=monthly*12+setup, delta=current?current-monthly:0;
+
+    html += heroKpi("Estimated monthly service",money(monthly),`${employees} employees • ${runs} runs/month`);
+    html += kpiGrid([
+      ["First-year cost",money(firstYear),"12 months + setup"],
+      ["Setup fee",money(setup),"One-time"],
+      ["Monthly difference",current?money(delta):"N/A","Current − proposed"],
+      ["Current monthly cost",current?money(current):"N/A","If entered"]
+    ]);
+
+    summary = `For ${employees} employees and ${runs} payroll runs per month, the entered quote is about ${money(monthly)} monthly plus ${money(setup)} setup, or ${money(firstYear)} in year one.`;
+  }
+
+  else if(p==="Business Advisory"){
+    const project=num("advProject"), ret=num("advRetainer"), months=num("advMonths"), base=num("advBase"), feePct=num("advPct");
+    const success=base*feePct/100, total=project+ret*months+success;
+
+    html += heroKpi("Estimated engagement total",money(total),`${months} month engagement`);
+    html += kpiGrid([
+      ["Project fee",money(project),"One-time"],
+      ["Retainer total",money(ret*months),`${months} months`],
+      ["Success fee",money(success),"Based on entered terms"],
+      ["Monthly retainer",money(ret),"Entered amount"]
+    ]);
+
+    summary = `The entered advisory structure totals ${money(total)}: ${money(project)} project fee, ${money(ret)} per month for ${months} months, and ${money(success)} in success fee.`;
+  }
+
+  else {
+    const setup=num("svcSetup"), monthly=num("svcMonthly"), months=num("svcMonths"), other=num("svcOther"), current=num("svcCurrent");
+    const total=setup+monthly*months+other, avg=safeDiv(total,months), delta=current?current*months-total:0;
+
+    html += heroKpi("Estimated contract total",money(total),`${months} month service term`);
+    html += kpiGrid([
+      ["Average monthly",money(avg),"Including one-time fees"],
+      ["Setup fee",money(setup),"One-time"],
+      ["Monthly fee",money(monthly),"Recurring"],
+      ["Difference vs current",current?money(delta):"N/A","Positive = lower entered cost"]
+    ]);
+
+    summary = `The entered ${p.toLowerCase()} pricing is ${money(setup)} upfront plus ${money(monthly)} per month for ${months} months, with ${money(other)} in other fees. Total entered cost is ${money(total)}.`;
+  }
+
+  html += summaryBox(summary);
+  html += `<div class="callout info"><strong>Product note:</strong> ${PRODUCTS[p].note}</div>`;
+  out.innerHTML = html;
+}
+
+function runMatcher(){
+  const use=val("matchUse"), urgency=val("matchUrgency"), credit=val("matchCredit");
+  const names=["Merchant Cash Advance (MCA)","Line of Credit","Term Loan","SBA Loan","Equipment Financing","Mortgage Financing","Factoring","P.O. Financing"];
+  const scores=Object.fromEntries(names.map(x=>[x,0]));
+  const reasons=Object.fromEntries(names.map(x=>[x,[]]));
+  const add=(p,s,r)=>{scores[p]+=s;reasons[p].push(r)};
+
+  if(use.includes("Working capital")){
+    add("Merchant Cash Advance (MCA)",4,"Fast working-capital fit.");
+    add("Line of Credit",4,"Reusable capital can fit.");
+    add("Term Loan",2,"Fixed financing may fit.");
+  }
+  if(use.includes("Inventory")){
+    add("P.O. Financing",5,"Could be tied to purchase orders.");
+    add("Merchant Cash Advance (MCA)",2,"Alternative working capital may help.");
+  }
+  if(use.includes("Equipment")) add("Equipment Financing",8,"Funds are tied to equipment.");
+  if(use.toLowerCase().includes("real estate")) add("Mortgage Financing",8,"Funds are tied to commercial real estate.");
+  if(use.includes("Expansion")){
+    add("SBA Loan",4,"Longer-term expansion may fit.");
+    add("Term Loan",4,"Fixed expansion capital may fit.");
+    add("Line of Credit",2,"Phased spending may fit a line.");
+  }
+  if(use.includes("Refinance")){
+    add("Term Loan",4,"Longer-term restructuring may fit.");
+    add("Merchant Cash Advance (MCA)",2,"Alternative refinance options may exist.");
+  }
+
+  if(urgency==="Within 1–3 days"){
+    add("Merchant Cash Advance (MCA)",5,"Very fast timing.");
+    add("Line of Credit",2,"May fit if approvable quickly.");
+    scores["SBA Loan"]-=4;
+  } else if(urgency==="Within 1–2 weeks"){
+    add("Line of Credit",2,"Moderate timing.");
+    add("Term Loan",1,"May fit depending on provider.");
+  } else {
+    add("SBA Loan",3,"Client can tolerate longer underwriting.");
+    add("Term Loan",3,"Time allows more conventional underwriting.");
+  }
+
+  if(credit==="Strong"){
+    add("SBA Loan",4,"Stronger credit.");
+    add("Term Loan",4,"Stronger credit.");
+    add("Line of Credit",3,"Stronger credit.");
+  } else if(credit==="Fair"){
+    add("Merchant Cash Advance (MCA)",2,"Alternative capital may be accessible.");
+    add("Line of Credit",1,"May fit depending on underwriting.");
+  } else {
+    add("Merchant Cash Advance (MCA)",4,"Less dependent on traditional credit.");
+    scores["SBA Loan"]-=2;
+    scores["Term Loan"]-=1;
+  }
+
+  if(checked("matchRecurring")) add("Line of Credit",6,"Reusable access needed.");
+  if(checked("matchInvoices")) add("Factoring",8,"B2B receivables available.");
+  if(checked("matchPO")) add("P.O. Financing",8,"Purchase orders available.");
+  if(checked("matchEquipment")) add("Equipment Financing",5,"Equipment available.");
+  if(checked("matchProperty")) add("Mortgage Financing",5,"Commercial property available.");
+
+  const ranked=Object.entries(scores).sort((a,b)=>b[1]-a[1]).filter(x=>x[1]>0).slice(0,4);
+
+  document.getElementById("matcherResults").innerHTML = ranked.length ? ranked.map(([p,s],i)=>`
+    <div class="match-card">
+      <div class="match-rank">
+        <span>#${i+1} product fit</span>
+        <span class="match-score">${s}</span>
+      </div>
+      <div class="match-name">${p}</div>
+      <div class="match-why">${reasons[p].slice(0,2).join(" ")}</div>
+    </div>`).join("") : `<div class="callout warning">Not enough information for a useful match.</div>`;
+}
+
+function renderLibrary(){
+  const filter=val("libraryFilter");
+  const items=ORDER.filter(p=>filter==="All" || PRODUCTS[p].group===filter);
+  const list=(arr)=>`<ul>${arr.map(q=>`<li>${q}</li>`).join("")}</ul>`;
+  document.getElementById("libraryList").innerHTML = items.map((p,i)=>{
+    const x=PRODUCTS[p];
+    const questions=x.questions.length?`<h4>Questions to ask</h4>${list(x.questions)}`:"";
+    const docs=x.docs.length?`<h4>Typical documents / information</h4>${list(x.docs)}`:"";
+    const how=x.how?`<h4>How it works</h4><p>${x.how}</p>`:"";
+    const fit=x.bestFor&&x.bestFor.length?`<div class="pd-cols"><div><h4>Best for</h4>${list(x.bestFor)}</div><div><h4>Watch-outs</h4>${list(x.watchOuts||[])}</div></div>`:"";
+    return `
+      <article class="product-card" id="productCard${i}">
+        <div class="product-card-top">
+          <div>
+            <div class="group-tag">${x.group}</div>
+            <h3>${p}</h3>
+          </div>
+          <span class="pill">${x.status}</span>
+        </div>
+        <p>${x.best}</p>
+        <button type="button" aria-expanded="false" onclick="const c=document.getElementById('productCard${i}');c.classList.toggle('open');this.setAttribute('aria-expanded',c.classList.contains('open'));this.textContent=c.classList.contains('open')?'Hide details':'View details'">View details</button>
+        <div class="product-details">
+          ${x.overview?`<h4>Overview</h4><p>${x.overview}</p>`:""}
+          ${how}
+          ${fit}
+          ${questions}${docs}
+          <p class="pd-note"><strong>Note:</strong> ${x.note}</p>
+          <p class="pd-note"><strong>Reference:</strong> ${x.source}</p>
+        </div>
+      </article>`;
+  }).join("");
+}
+
+function applyPayoutMode(){
+  const mode=val("payoutMode");
+  if(mode==="tier1"){
+    document.getElementById("commissionPct").value=30;
+    document.getElementById("psfPct").value=25;
+  } else if(mode==="training"){
+    document.getElementById("commissionPct").value=15;
+    document.getElementById("psfPct").value=10;
+  }
+  calcPayout();
+}
+
+function calcPayout(){
+
+  const cp=num("commissionPct"), pp=num("psfPct"), commission=num("totalCommission"), psf=num("actualPSF");
+  const repCommission=commission*cp/100, repPSF=psf*pp/100, total=repCommission+repPSF;
+
+  document.getElementById("payoutOutput").innerHTML =
+    heroKpi("Estimated payout",money(total),"Before clawbacks or adjustments") +
+    kpiGrid([
+      ["Commission share",money(repCommission),`${cp.toFixed(1)}% of commission`],
+      ["PSF share",money(repPSF),`${pp.toFixed(1)}% of PSF`],
+      ["Commission",money(commission),"Actual amount entered"],
+      ["PSF",money(psf),"Actual amount entered"]
+    ]);
+}
+
+/* =====================================================================
+   STATEMENT ANALYZER
+   1) Claude API reads each PDF into structured transactions (tool use).
+   2) Everything below saSummarizeStatement() is plain JavaScript math,
+      so every figure in the report traces back to listed transactions.
+   ===================================================================== */
+
+const SA_CATS_IN = {
+  revenue:"Revenue (sales / customer payments)",
+  cash_deposit:"Cash deposit",
+  unclear_in:"Unclear source",
+  transfer_in:"Transfer from own / related account",
+  funding_in:"Loan / MCA funding received",
+  refund_other_in:"Refund / reversal / interest"
+};
+const SA_CATS_OUT = {
+  mca_alt_payment:"MCA / alt-lender payment",
+  loan_payment:"Bank / auto / equipment loan",
+  payroll:"Payroll / contractors",
+  rent:"Rent / lease",
+  taxes:"Taxes",
+  insurance:"Insurance",
+  utilities_telecom:"Utilities / telecom",
+  inventory_supplies:"Inventory / supplies / COGS",
+  fuel_vehicle:"Fuel / vehicle",
+  software_marketing:"Software / marketing",
+  credit_card_payment:"Credit card payment",
+  transfer_out:"Transfer to own / related account",
+  cash_withdrawal:"Cash withdrawal",
+  owner_personal:"Owner draw / personal",
+  od_nsf_fee:"Overdraft / NSF fee",
+  bank_fee:"Bank / processing fee",
+  other_out:"Other expense"
+};
+const SA_ALL_CATS = Object.assign({}, SA_CATS_IN, SA_CATS_OUT);
+const SA_REVENUE_CATS = ["revenue","cash_deposit","unclear_in"];
+const SA_DEBT_CATS = ["mca_alt_payment","loan_payment"];
+const SA_PROCESSOR_RE = /payment|square|stripe|clover|epx|merch|paypal|toast|heartland|worldpay|fiserv|global|processing|shopify|amex|visa|card/i;
+
+/* Built-in red-flag signals. These are general patterns MCA underwriters react to,
+   not any lender's criteria (brokers never see those). Shown in the report under
+   "How this was graded" so every call can be second-guessed. */
+const SA_BENCH = {
+  revMajor:10000,   revCaution:20000,     // verified monthly revenue
+  negMajor:5,       negCaution:1,         // negative-balance days per month (avg)
+  nsfMajor:4,       nsfCaution:1,         // NSF / overdraft fees per month (avg)
+  posMajor:4,       posCaution:2,         // active MCA / alt-lender positions
+  debtMajor:0.40,   debtCaution:0.20,     // existing debt payments ÷ revenue
+  adbCaution:1000,                         // average daily balance
+  depCaution:4,                            // revenue deposits per month
+  declineCaution:-0.20,                    // first → latest month revenue change
+  monthsWanted:4
+};
+const SA_KEY_KEY="ds_sa_api_key", SA_MODEL_KEY="ds_sa_model";
+const DAY=86400000;
+
+const SA = { files:[], manual:[], seq:1, running:false };
+
+/* ---------- small helpers ---------- */
+function lsSet(k,v){ try{ if(v===null) localStorage.removeItem(k); else localStorage.setItem(k,v); }catch(e){} }
+function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function parseD(s){ const m=String(s||"").match(/^(\d{4})-(\d{2})-(\d{2})/); return m? Date.UTC(+m[1],+m[2]-1,+m[3]) : NaN; }
+function isoD(t){ return new Date(t).toISOString().slice(0,10); }
+function monthLabel(key){ const [y,m]=key.split("-").map(Number); return new Date(Date.UTC(y,m-1,1)).toLocaleString("en-US",{month:"short",year:"numeric",timeZone:"UTC"}); }
+function median(a){ if(!a.length) return 0; const s=[...a].sort((x,y)=>x-y), h=Math.floor(s.length/2); return s.length%2? s[h] : (s[h-1]+s[h])/2; }
+const pct0 = x => `${Math.round((x||0)*100)}%`;
+const sumBy = (arr,f) => arr.reduce((a,x)=>a+(Number(f(x))||0),0);
+
+/* ---------- files ---------- */
+function saAddFiles(list){
+  [...list].forEach(f=>{
+    if(!/\.pdf$/i.test(f.name) && f.type!=="application/pdf") return;
+    if(SA.files.some(x=>x.file && x.name===f.name && x.file.size===f.size)) return;
+    SA.files.push({id:SA.seq++, file:f, name:f.name, status:"queued", data:null, error:"", recon:0});
+  });
+  saRenderFiles();
+}
+function saRemoveFile(id){ SA.files=SA.files.filter(f=>f.id!==id); saRenderFiles(); saRenderAll(); }
+
+function saBadge(f){
+  if(f.status==="queued") return `<span class="badge idle">Ready</span>`;
+  if(f.status==="reading") return `<span class="badge busy">Reading… ${f.progress||0} txns</span>`;
+  if(f.status==="error") return `<span class="badge err" title="${esc(f.error)}">Error</span>`;
+  const off=Math.abs(f.recon||0);
+  return off<1 ? `<span class="badge ok" title="Beginning balance + transactions = ending balance">✓ Reconciles</span>`
+               : `<span class="badge warn" title="Beginning balance + transactions ≠ ending balance. Some transactions may be missing.">⚠ Off ${money(off)}</span>`;
+}
+function saRenderFiles(){
+  document.getElementById("saFiles").innerHTML = SA.files.map(f=>{
+    const d=f.data;
+    const meta = d ? `${esc(d.bank_name||"")} · ${esc(d.account_holder||"")} · …${esc(d.account_last4||"")} · ${esc(d.period_start)} → ${esc(d.period_end)} · ${d.transactions.length} txns`
+                   : f.status==="error" ? esc(f.error) : f.file ? `${Math.round(f.file.size/1024)} KB` : "";
+    return `<div class="file-row">
+      <div class="file-info"><div class="name">${esc(f.name)}</div><div class="meta">${meta}</div></div>
+      <div class="file-actions">${saBadge(f)}<button class="x-btn" title="Remove" onclick="saRemoveFile(${f.id})">×</button></div>
+    </div>`;
+  }).join("");
+}
+function saStatus(msg,kind){
+  document.getElementById("saStatus").innerHTML = msg ? `<div class="callout ${kind||"info"}">${esc(msg)}</div>` : "";
+}
+
+/* ---------- Claude API extraction ---------- */
+const SA_SYSTEM = `You are a meticulous bank-statement extraction engine for a small-business lending broker's pre-underwriting tool. Read the attached statement and return it as JSON matching the required schema.
+
+RULES
+- Include EVERY transaction posted in the period: deposits, checks, card purchases, ACH, wires, transfers, Zelle and fees. Never skip, merge or summarize. Checks listed in a separate checks section are transactions. Ignore check images that only duplicate listed checks.
+- Amount sign: positive = money in, negative = money out (including fees). Use full YYYY-MM-DD posting dates, inferring the year from the statement period.
+- The list must reconcile: beginning_balance + sum(amounts) = ending_balance. Re-check if it does not.
+- Keep t (description) to 30 characters or fewer and notes to 2 sentences. Output only the JSON.
+- Never invent values. Use null for printed totals the statement does not show. reported_total_credits / reported_total_debits are the statement's own totals of all money in / all money out (fees included), as positive numbers.
+
+CREDIT CATEGORIES
+- revenue: card-processor settlements (Global Payments, EPX, Square, Stripe, Clover…), ACH / wire / Zelle from customers or businesses, deposited customer checks, payments from government agencies for services.
+- cash_deposit: cash deposited at an ATM or branch.
+- unclear_in: deposits with no identifiable source (generic "Deposit", "Deposit/Credit", mobile check deposit with no payer, Zelle from an individual with no business context).
+- transfer_in: transfers from the holder's own or related accounts / affiliated entities (online or mobile banking transfers, book transfers between own accounts).
+- funding_in: proceeds from MCA funders, online / alternative lenders, bank loans or credit lines (e.g. "Capflow Funding … Advance", "Expansion Capital FUNDING", "WebBank/Intuit loan", OnDeck or Fundbox disbursements).
+- refund_other_in: purchase refunds, reversals, returned items, interest.
+
+DEBIT CATEGORIES
+- mca_alt_payment: recurring debits or wires to MCA funders and online / alternative lenders (OnDeck, Fundbox, Kabbage, BlueVine, Credibly, Intuit / QuickBooks Capital, Square / Shopify / PayPal capital, "… Capital" or "… Funding" companies).
+- loan_payment: bank loans, SBA, auto / vehicle / equipment financing (e.g. Westlake, Stellantis), mortgages, student loans.
+- payroll, rent, taxes, insurance, utilities_telecom, inventory_supplies, fuel_vehicle, software_marketing, credit_card_payment, transfer_out (to own / related accounts), cash_withdrawal, owner_personal (clearly personal spending or personal remittances), od_nsf_fee, bank_fee (maintenance, wire, merchant discount / processing fees), other_out.
+
+COUNTERPARTY (p)
+- A short, consistent name so items from the same party group together: "OnDeck", "Fundbox", "Harbor View Capital", "Global Payments", "Own acct …3099", "Kris McCray". Use identical spelling every time. If one lender has two separate loans shown with different IDs, keep them apart, e.g. "OnDeck (Capital17)" and "OnDeck (Capital20)".
+
+NOTES
+- Briefly note anything an underwriter should know: savings or escrow account, account in a different name, checks written to the business itself, unusually large items, missing pages.`;
+
+const SA_TOOL = {
+  name:"record_statement",
+  description:"Record the full structured contents of one bank statement.",
+  input_schema:{
+    type:"object",
+    properties:{
+      bank_name:{type:"string"},
+      account_holder:{type:"string"},
+      account_last4:{type:"string",description:"Last 4 digits of the account number"},
+      account_type:{type:"string",enum:["checking","savings","other"]},
+      period_start:{type:"string",description:"YYYY-MM-DD"},
+      period_end:{type:"string",description:"YYYY-MM-DD"},
+      beginning_balance:{type:"number"},
+      ending_balance:{type:"number"},
+      reported_total_credits:{anyOf:[{type:"number"},{type:"null"}]},
+      reported_total_debits:{anyOf:[{type:"number"},{type:"null"}]},
+      od_nsf_fee_count:{type:"integer",description:"Number of overdraft, NSF or returned-item fees charged in this period"},
+      transactions:{type:"array",items:{type:"object",properties:{
+        d:{type:"string",description:"YYYY-MM-DD"},
+        a:{type:"number",description:"Signed amount: + money in, - money out"},
+        c:{type:"string",enum:Object.keys(SA_ALL_CATS)},
+        p:{type:"string",description:"Short consistent counterparty name"},
+        t:{type:"string",description:"Short description, max 30 characters"}
+      },required:["d","a","c","p","t"],additionalProperties:false}},
+      notes:{type:"string"}
+    },
+    required:["bank_name","account_holder","account_last4","account_type","period_start","period_end","beginning_balance","ending_balance","reported_total_credits","reported_total_debits","od_nsf_fee_count","transactions","notes"],
+    additionalProperties:false
+  }
+};
+
+function fileToBase64(file){
+  return new Promise((res,rej)=>{
+    const r=new FileReader();
+    r.onload=()=>res(String(r.result).split(",")[1]);
+    r.onerror=()=>rej(new Error("Could not read the file"));
+    r.readAsDataURL(file);
+  });
+}
+
+function saParseJson(text){
+  let t=String(text||"").trim().replace(/^```(?:json)?\s*/i,"").replace(/```\s*$/,"");
+  try{ return JSON.parse(t); }catch(e){}
+  const a=t.indexOf("{"), b=t.lastIndexOf("}");
+  if(a>=0 && b>a){ try{ return JSON.parse(t.slice(a,b+1)); }catch(e){} }
+  return null;
+}
+
+function saSpeedSettings(model){
+  // Plain extraction doesn't need up-front reasoning; turning it off and using low effort is much faster.
+  if(/sonnet-5-5/.test(model)) return {thinking:{type:"between_tools"}, effort:"low"};
+  if(/haiku-5-5/.test(model))  return {thinking:{type:"disabled"}, effort:"low"};
+  return {};
+}
+
+async function saCall(key,body,onText){
+  const res=await fetch("https://api.anthropic.com/v1/messages",{
+    method:"POST",
+    headers:{
+      "content-type":"application/json",
+      "x-api-key":key,
+      "anthropic-version":"2023-06-01",
+      "anthropic-dangerous-direct-browser-access":"true"
+    },
+    body:JSON.stringify({...body, stream:true})
+  });
+  if(!res.ok){
+    let detail=""; try{ const j=await res.json(); detail=(j.error&&j.error.message)||""; }catch(e){}
+    const err=new Error(
+      res.status===401? "Invalid API key (401)." :
+      res.status===429? "Rate limit hit (429). Wait a minute and click Analyze again." :
+      res.status===529? "Anthropic API is overloaded (529). Try again in a few minutes." :
+      `API error ${res.status}${detail?`: ${detail}`:""}`);
+    err.status=res.status; throw err;
+  }
+  // Read the server-sent event stream
+  const reader=res.body.getReader(), dec=new TextDecoder();
+  let buf="", text="", stop=null, types=[];
+  for(;;){
+    const {value,done}=await reader.read();
+    if(done) break;
+    buf+=dec.decode(value,{stream:true});
+    let k;
+    while((k=buf.indexOf("\n\n"))>=0){
+      const chunk=buf.slice(0,k); buf=buf.slice(k+2);
+      const line=chunk.split("\n").find(l=>l.startsWith("data:"));
+      if(!line) continue;
+      let ev; try{ ev=JSON.parse(line.slice(5)); }catch(e){ continue; }
+      if(ev.type==="content_block_start") types.push(ev.content_block && ev.content_block.type);
+      else if(ev.type==="content_block_delta" && ev.delta && ev.delta.type==="text_delta"){ text+=ev.delta.text; onText && onText(text); }
+      else if(ev.type==="message_delta" && ev.delta) stop=ev.delta.stop_reason||stop;
+      else if(ev.type==="error") throw new Error(`API error: ${(ev.error&&ev.error.message)||"stream error"}`);
+    }
+  }
+  return {text, stop, types};
+}
+
+async function saExtract(file,key,model,onProgress){
+  const b64=await fileToBase64(file);
+  const base={
+    model, max_tokens:32000, system:SA_SYSTEM,
+    output_config:{format:{type:"json_schema",schema:SA_TOOL.input_schema}},
+    messages:[{role:"user",content:[
+      {type:"document",source:{type:"base64",media_type:"application/pdf",data:b64}},
+      {type:"text",text:"Extract this bank statement. Include every transaction."}
+    ]}]
+  };
+  const speed=saSpeedSettings(model);
+  const body={...base, output_config:{...base.output_config, ...(speed.effort?{effort:speed.effort}:{})}, ...(speed.thinking?{thinking:speed.thinking}:{})};
+  const onText=t=>onProgress && onProgress((t.match(/"c"\s*:/g)||[]).length);
+  let r;
+  try{ r=await saCall(key,body,onText); }
+  catch(e){
+    // If the speed settings are rejected for this model, retry once with defaults.
+    if(e.status===400 && (speed.effort||speed.thinking)) r=await saCall(key,base,onText);
+    else throw e;
+  }
+  console.log("[Statement Analyzer]", file.name, {stop:r.stop, blocks:r.types, chars:r.text.length});
+  if(r.stop==="max_tokens") throw new Error("Statement too long to read in one pass. Split the PDF into smaller files or enter this month manually.");
+  if(r.stop==="refusal") throw new Error("The model declined to read this file. Try again, or enter this month manually.");
+  const data=saParseJson(r.text);
+  if(data && Array.isArray(data.transactions)) return data;
+  throw new Error(`Couldn't read structured data (stop reason: ${r.stop||"unknown"}; content: ${r.types.join(", ")||"none"}). ${r.text?`Model said: "${r.text.slice(0,160)}"`:""}`);
+}
+
+function saNormalize(d){
+  d.transactions=(d.transactions||[]).map(t=>{
+    const a=Math.round(Number(t.a)*100)/100;
+    let c=SA_ALL_CATS[t.c]? t.c : (a>=0?"unclear_in":"other_out");
+    if(a>=0 && SA_CATS_OUT[c]) c="unclear_in";
+    if(a<0 && SA_CATS_IN[c]) c="other_out";
+    return {d:String(t.d||"").slice(0,10), a, c, p:String(t.p||"").trim()||"Unknown", t:String(t.t||"")};
+  }).filter(t=>!isNaN(t.a) && t.a!==0);
+  d.daily_balances=(d.daily_balances||[]).filter(x=>x && x.d && !isNaN(Number(x.b))).map(x=>({d:String(x.d).slice(0,10), b:Number(x.b)}));
+  d.beginning_balance=Number(d.beginning_balance)||0;
+  d.ending_balance=Number(d.ending_balance)||0;
+  return d;
+}
+function saRecon(d){ return Math.round((d.beginning_balance + sumBy(d.transactions,t=>t.a) - d.ending_balance)*100)/100; }
+
+async function saRun(){
+  if(SA.running) return;
+  const key=val("saKey").trim(), model=val("saModel")||"claude-sonnet-5-5";
+  const pending=SA.files.filter(f=>f.file && (f.status==="queued"||f.status==="error"));
+  if(!pending.length){
+    saStatus(SA.files.length? "All statements are already read. Add more PDFs or correct categories below." : "Add statement PDFs first, or add months manually.","info");
+    saRenderAll(); return;
+  }
+  if(!key){ saStatus("Enter your Anthropic API key to read PDFs, or add months manually.","warning"); return; }
+  if(checked("saRemember")) lsSet(SA_KEY_KEY,key);
+  lsSet(SA_MODEL_KEY,model);
+  SA.running=true; document.getElementById("saRun").disabled=true;
+
+  const t0=Date.now();
+  const tick=()=>{
+    const done=pending.filter(f=>f.status!=="reading").length, secs=Math.round((Date.now()-t0)/1000);
+    const txns=sumBy(pending,f=>f.progress||0);
+    saStatus(`Reading ${pending.length} statement(s) at the same time — ${done} of ${pending.length} done · ${txns} transactions read · ${secs}s`,"info");
+  };
+  const timer=setInterval(()=>{ tick(); saRenderFiles(); },1000);
+  pending.forEach(f=>{ f.status="reading"; f.error=""; f.progress=0; });
+  saRenderFiles(); tick();
+
+  // Read up to 4 statements in parallel
+  const queue=[...pending];
+  const worker=async()=>{
+    while(queue.length){
+      const f=queue.shift();
+      try{
+        f.data=saNormalize(await saExtract(f.file,key,model,n=>{ f.progress=n; }));
+        f.recon=saRecon(f.data);
+        f.status="done";
+      }catch(e){ f.status="error"; f.error=e.message||String(e); }
+      saRenderFiles(); saRenderAll();
+    }
+  };
+  await Promise.all(Array.from({length:Math.min(4,pending.length)},worker));
+
+  clearInterval(timer);
+  SA.running=false; document.getElementById("saRun").disabled=false;
+  const errs=SA.files.filter(f=>f.status==="error").length, secs=Math.round((Date.now()-t0)/1000);
+  saStatus(errs? `${errs} statement(s) could not be read — hover the Error badge for the reason, then click Analyze again to retry.` : `Done in ${secs}s.`, errs?"warning":"good");
+}
+
+/* ---------- manual months ---------- */
+const SA_MANUAL_FIELDS = [
+  ["month","Statement month","month"],
+  ["days","Days in period"],
+  ["deposits","Total deposits ($)"],
+  ["nonRev","Non-revenue deposits ($) — transfers, loans, refunds"],
+  ["funding","…of which loan / MCA funding ($)"],
+  ["cash","Cash deposits ($)"],
+  ["revCount","# of revenue deposits"],
+  ["adb","Average daily balance ($)"],
+  ["low","Lowest balance ($)"],
+  ["negDays","Negative-balance days"],
+  ["odNsf","NSF / overdraft fees (#)"],
+  ["positions","Active MCA positions (#)"],
+  ["debt","Monthly MCA + loan payments ($)"]
+];
+function saAddManual(){
+  SA.manual.push({id:SA.seq++, month:"", days:30, deposits:0, nonRev:0, funding:0, cash:0, revCount:0, adb:0, low:0, negDays:0, odNsf:0, positions:0, debt:0});
+  saRenderManual();
+}
+function saRenderManual(){
+  document.getElementById("saManual").innerHTML = SA.manual.map(m=>`
+    <div class="manual-row">
+      <div class="section-block-title"><h4>Manual month${m.month?` — ${esc(monthLabel(m.month))}`:""}</h4><button class="x-btn" title="Remove" onclick="saRemoveManual(${m.id})">×</button></div>
+      <div class="form-grid">${SA_MANUAL_FIELDS.map(([k,label,kind])=> kind==="month"
+        ? `<label class="field"><span>${label}</span><input type="month" value="${esc(m.month)}" onchange="saManualSet(${m.id},'${k}',this.value,true)"></label>`
+        : `<label class="field"><span>${label}</span><input type="number" step="any" value="${m[k]}" oninput="saManualSet(${m.id},'${k}',this.value)"></label>`).join("")}
+      </div>
+    </div>`).join("");
+}
+function saManualSet(id,k,v,rerender){
+  const m=SA.manual.find(x=>x.id===id); if(!m) return;
+  m[k]= k==="month"? v : (Number(v)||0);
+  if(rerender) saRenderManual();
+  saRenderReport();
+}
+function saRemoveManual(id){ SA.manual=SA.manual.filter(m=>m.id!==id); saRenderManual(); saRenderReport(); }
+
+/* ---------- per-statement math ---------- */
+function saDailySeries(d,start,end){
+  const out=[];
+  let cur=d.beginning_balance;
+  if(d.daily_balances.length){
+    const map={}; d.daily_balances.forEach(x=>{ const t=parseD(x.d); if(!isNaN(t)) map[t]=x.b; });
+    for(let t=start;t<=end;t+=DAY){ if(map[t]!==undefined) cur=map[t]; out.push(cur); }
+  } else {
+    const byDay={}; d.transactions.forEach(x=>{ const t=parseD(x.d); byDay[t]=(byDay[t]||0)+x.a; });
+    for(let t=start;t<=end;t+=DAY){ if(byDay[t]) cur+=byDay[t]; out.push(cur); }
+  }
+  return out;
+}
+
+function saSummarizeStatement(f){
+  const d=f.data, tx=d.transactions;
+  let start=parseD(d.period_start), end=parseD(d.period_end);
+  if(isNaN(start)||isNaN(end)||end<start){
+    const ts=tx.map(t=>parseD(t.d)).filter(x=>!isNaN(x));
+    start=ts.length?Math.min(...ts):Date.UTC(2000,0,1); end=ts.length?Math.max(...ts):start;
+  }
+  if(end-start>400*DAY) start=end-400*DAY;
+  const days=Math.round((end-start)/DAY)+1, norm=30.4/days;
+  const credits=tx.filter(t=>t.a>0), debits=tx.filter(t=>t.a<0);
+  const inCat=c=>sumBy(credits.filter(t=>t.c===c),t=>t.a);
+  const revTx=credits.filter(t=>SA_REVENUE_CATS.includes(t.c));
+  const bal=saDailySeries(d,start,end);
+
+  const lenders={};
+  debits.filter(t=>SA_DEBT_CATS.includes(t.c)).forEach(t=>{
+    const L=lenders[t.p]||(lenders[t.p]={name:t.p,type:t.c,total:0,amounts:[],dates:[]});
+    L.total+=-t.a; L.amounts.push(-t.a); L.dates.push(t.d);
+  });
+  Object.values(lenders).forEach(L=>{
+    const perWeek=L.amounts.length/(days/7);
+    L.freq= perWeek>=3.5?"Daily": perWeek>=0.8?"Weekly": perWeek>=0.4?"Bi-weekly":"Monthly";
+    L.typical=median(L.amounts); L.monthly=L.total*norm; L.last=[...L.dates].sort().pop();
+  });
+
+  const expenses={}; debits.forEach(t=>{ expenses[t.c]=(expenses[t.c]||0)+(-t.a)*norm; });
+  const payers={}; revTx.forEach(t=>{ payers[t.p]=(payers[t.p]||0)+t.a*norm; });
+
+  return {
+    source:"pdf", id:f.id, fileName:f.name, key:isoD(start+(end-start)/2).slice(0,7), start, end, days,
+    bank:d.bank_name, holder:d.account_holder, last4:d.account_last4, type:d.account_type, notes:d.notes||"", recon:f.recon,
+    totalInM:sumBy(credits,t=>t.a)*norm, revenueM:sumBy(revTx,t=>t.a)*norm,
+    cashM:inCat("cash_deposit")*norm, unclearM:inCat("unclear_in")*norm,
+    transferInM:inCat("transfer_in")*norm, fundingInM:inCat("funding_in")*norm, refundM:inCat("refund_other_in")*norm,
+    revCountM:revTx.length*norm,
+    adb:sumBy(bal,b=>b)/(bal.length||1), low:bal.length?Math.min(...bal):0, negDays:bal.filter(b=>b<0).length,
+    odNsf:Math.max(tx.filter(t=>t.c==="od_nsf_fee").length, Number(d.od_nsf_fee_count)||0),
+    debtM:sumBy(debits.filter(t=>SA_DEBT_CATS.includes(t.c)),t=>-t.a)*norm,
+    lenders, expenses, payers, positionsCount:0,
+    fundings:credits.filter(t=>t.c==="funding_in"),
+    unclearTx:credits.filter(t=>t.c==="unclear_in"||t.c==="cash_deposit")
+  };
+}
+
+function saSummarizeManual(m){
+  const days=Math.max(1,m.days||30), norm=30.4/days, nonRev=Math.min(m.nonRev,m.deposits);
+  const start=parseD(m.month+"-01"), end=start+(days-1)*DAY;
+  return {
+    source:"manual", id:m.id, fileName:"Manual entry", key:m.month, start, end, days,
+    bank:"Manual entry", holder:"", last4:"", type:"checking", notes:"", recon:0,
+    totalInM:m.deposits*norm, revenueM:(m.deposits-nonRev)*norm, cashM:m.cash*norm, unclearM:0,
+    transferInM:Math.max(0,nonRev-m.funding)*norm, fundingInM:m.funding*norm, refundM:0,
+    revCountM:m.revCount*norm, adb:m.adb, low:m.low, negDays:m.negDays, odNsf:m.odNsf,
+    debtM:m.debt, lenders:{}, expenses:{}, payers:{}, positionsCount:m.positions,
+    fundings:m.funding>0? [{d:m.month+"-15",a:m.funding,p:"Funding (manual entry)"}] : [], unclearTx:[]
+  };
+}
+
+/* ---------- whole-file analysis ---------- */
+function saBusinessName(items){
+  return val("clientName").trim() || (items.find(i=>i.holder)||{}).holder || "This business";
+}
+
+function saAnalyze(){
+  const items=[
+    ...SA.files.filter(f=>f.status==="done" && f.data).map(saSummarizeStatement),
+    ...SA.manual.filter(m=>m.month).map(saSummarizeManual)
+  ];
+  if(!items.length) return null;
+
+  const byKey={}; items.forEach(it=>(byKey[it.key]=byKey[it.key]||[]).push(it));
+  const months=Object.keys(byKey).sort().map(k=>{
+    const a=byKey[k];
+    const revenue=sumBy(a,x=>x.revenueM);
+    return {
+      key:k, label:monthLabel(k), accounts:a.length,
+      totalIn:sumBy(a,x=>x.totalInM), excluded:sumBy(a,x=>x.transferInM+x.fundingInM+x.refundM),
+      revenue, revCount:sumBy(a,x=>x.revCountM), adb:sumBy(a,x=>x.adb), low:Math.min(...a.map(x=>x.low)),
+      negDays:Math.max(...a.map(x=>x.negDays)), odNsf:sumBy(a,x=>x.odNsf), debt:sumBy(a,x=>x.debtM),
+      cash:sumBy(a,x=>x.cashM), unclear:sumBy(a,x=>x.unclearM), transferIn:sumBy(a,x=>x.transferInM), funding:sumBy(a,x=>x.fundingInM)
+    };
+  });
+  const n=months.length, avg=f=>sumBy(months,f)/n;
+  const first=months[0], latest=months[n-1];
+  const avgRev=avg(m=>m.revenue);
+  const maxEnd=Math.max(...items.map(i=>i.end));
+
+  // lenders across all statements
+  const lm={};
+  items.forEach(it=>Object.values(it.lenders).forEach(L=>{
+    const M=lm[L.name]||(lm[L.name]={name:L.name,type:L.type,last:"",freq:"",typical:0,monthly:0,total:0,count:0,keys:new Set()});
+    M.total+=L.total; M.count+=L.amounts.length; M.keys.add(it.key);
+    if(L.last>M.last){ M.last=L.last; M.freq=L.freq; M.typical=L.typical; M.monthly=L.monthly; M.type=L.type; }
+  }));
+  const lenders=Object.values(lm).map(L=>({...L, monthsSeen:L.keys.size, active:(maxEnd-parseD(L.last))/DAY<=35})).sort((a,b)=>b.monthly-a.monthly);
+  const activeMca=lenders.filter(L=>L.active && L.type==="mca_alt_payment");
+  const activeDebt=lenders.filter(L=>L.active);
+  const latestManual=byKey[latest.key].filter(i=>i.source==="manual");
+  const positions=Math.max(activeMca.length, ...latestManual.map(i=>i.positionsCount||0), 0);
+  const debtNow=sumBy(activeDebt,L=>L.monthly)+sumBy(latestManual,i=>i.debtM);
+  const holdback= avgRev>0? debtNow/avgRev : (debtNow>0? 1 : 0);
+
+  const fundings=items.flatMap(it=>it.fundings.map(f=>({...f,file:it.fileName}))).sort((a,b)=>a.d<b.d?1:-1);
+  const recentFundings=fundings.filter(f=>(maxEnd-parseD(f.d))/DAY<=60);
+  const totIn=sumBy(months,m=>m.totalIn), totRev=sumBy(months,m=>m.revenue);
+
+  const payers={}; items.forEach(it=>Object.entries(it.payers).forEach(([k,v])=>payers[k]=(payers[k]||0)+v));
+  const pdfRev=sumBy(items.filter(i=>i.source==="pdf"),i=>i.revenueM);
+  const topPayerEntry=Object.entries(payers).filter(([k])=>!SA_PROCESSOR_RE.test(k)).sort((a,b)=>b[1]-a[1])[0];
+  const topPayer= topPayerEntry && pdfRev>0 ? {name:topPayerEntry[0], share:topPayerEntry[1]/pdfRev} : null;
+
+  const expenses={}; items.forEach(it=>Object.entries(it.expenses).forEach(([k,v])=>expenses[k]=(expenses[k]||0)+v/n));
+
+  return {
+    name:saBusinessName(items), items, months, n, first, latest, avgRev,
+    trend: n>=2 && first.revenue>0? (latest.revenue-first.revenue)/first.revenue : null,
+    avgAdb:avg(m=>m.adb), minLow:Math.min(...months.map(m=>m.low)),
+    avgNegDays:avg(m=>m.negDays), worstNegDays:Math.max(...months.map(m=>m.negDays)),
+    avgOdNsf:avg(m=>m.odNsf), avgRevCount:avg(m=>m.revCount),
+    lenders, activeMca, positions, debtNow, holdback,
+    fundings, recentFundings,
+    cashShare: totRev? sumBy(months,m=>m.cash)/totRev : 0,
+    unclearShare: totRev? sumBy(months,m=>m.unclear)/totRev : 0,
+    transferShare: totIn? sumBy(months,m=>m.transferIn)/totIn : 0,
+    bigUnclear: items.flatMap(i=>i.unclearTx).filter(t=>t.c==="unclear_in").sort((a,b)=>b.a-a.a).slice(0,3),
+    topPayer, expenses,
+    savings: items.filter(i=>i.type==="savings").map(i=>`${i.bank||"Account"} …${i.last4||""}`),
+    unreconciled: items.filter(i=>i.source==="pdf" && Math.abs(i.recon)>=1).map(i=>i.fileName)
+  };
+}
+
+/* ---------- flags, verdict ---------- */
+function saFlags(A){
+  const B=SA_BENCH, F=[];
+  const add=(level,title,detail="",ask="")=>F.push({level,title,detail,ask});
+
+  // Major red flags — patterns that commonly lead to declines
+  if(A.avgRev<B.revMajor) add("hard","Very low revenue",`Verified revenue averages ${money(A.avgRev)}/mo once transfers, loan/MCA fundings and refunds are removed.`,"Are sales also deposited into another business account or processor?");
+  if(A.positions>=B.posMajor) add("hard","Heavily stacked",`${A.positions} active MCA / alt-lender positions${A.activeMca.length?` (${A.activeMca.map(l=>l.name).join(", ")})`:""}.`,"What is the remaining balance on each position? Is any close to payoff?");
+  if(A.avgRev>0 && A.holdback>=B.debtMajor) add("hard","Debt payments eat the cash flow",`Existing debt payments ≈ ${money(A.debtNow)}/mo = ${pct0(A.holdback)} of verified revenue.`,"Would this funding pay off or consolidate existing positions?");
+  if(A.avgNegDays>B.negMajor) add("hard","Frequent negative balances",`Averages ${A.avgNegDays.toFixed(1)} negative-balance days per month (worst month: ${A.worstNegDays}).`,"What caused the account to go negative?");
+  if(A.avgOdNsf>=B.nsfMajor) add("hard","Many NSF / overdraft fees",`Averages ${A.avgOdNsf.toFixed(1)} NSF / overdraft fees per month.`,"What caused the overdrafts?");
+
+  // Cautions — things to explain or fix before shopping
+  if(A.avgRev>=B.revMajor && A.avgRev<B.revCaution) add("soft","Thin revenue",`Verified revenue of ${money(A.avgRev)}/mo limits how many lenders will look at the file.`);
+  if(A.positions>=B.posCaution && A.positions<B.posMajor) add("soft","Already has positions",`${A.positions} active positions (${A.activeMca.map(l=>l.name).join(", ")}). Expect a smaller offer or a consolidation.`,"What is the remaining balance on each position?");
+  if(A.avgRev>0 && A.holdback>=B.debtCaution && A.holdback<B.debtMajor) add("soft","Meaningful existing debt load",`Debt payments ≈ ${money(A.debtNow)}/mo = ${pct0(A.holdback)} of revenue.`);
+  if(A.avgNegDays>=B.negCaution && A.avgNegDays<=B.negMajor) add("soft","Some negative-balance days",`${A.avgNegDays.toFixed(1)} per month on average (worst month: ${A.worstNegDays}).`,"What caused the account to go negative?");
+  if(A.avgOdNsf>=B.nsfCaution && A.avgOdNsf<B.nsfMajor) add("soft","NSF / overdraft fees present",`${A.avgOdNsf.toFixed(1)} per month on average.`);
+  if(A.trend!==null && A.trend<=B.declineCaution) add("soft","Revenue declining",`Verified revenue fell ${pct0(-A.trend)} from ${A.first.label} to ${A.latest.label}.`,"Is the drop seasonal, or did you lose a customer?");
+  if(A.recentFundings.length) add("soft","New funding in the last 60 days",`${A.recentFundings.length} funding deposit(s): ${A.recentFundings.slice(0,4).map(f=>`${f.p} ${money(f.a)} on ${f.d}`).join("; ")}. Lenders see recent funding as stacking risk.`,"Was that a new advance or a renewal, and what are its payment terms?");
+  if(A.avgAdb<B.adbCaution) add("soft","Low average daily balance",`ADB averages ${money(A.avgAdb)}. Lowest balance: ${money(A.minLow)}.`);
+  if(A.avgRevCount<B.depCaution) add("soft","Few revenue deposits",`Only ${A.avgRevCount.toFixed(1)} revenue deposits per month on average.`);
+  if(A.cashShare>0.4) add("soft","Cash-heavy deposits",`${pct0(A.cashShare)} of verified revenue is cash, which lenders often discount.`,"Do you have POS or sales reports that back up the cash?");
+  if(A.transferShare>0.3) add("soft","Deposits inflated by internal transfers",`${pct0(A.transferShare)} of all deposits are transfers from own or related accounts. They were excluded from revenue.`,"Please send statements for the account the transfers come from.");
+  if(A.unclearShare>0.25) add("soft","Deposits with no clear source",`${pct0(A.unclearShare)} of counted revenue has no identifiable payer${A.bigUnclear.length?` (largest: ${A.bigUnclear.map(t=>`${money(t.a)} on ${t.d}`).join(", ")})`:""}.`,"What are these deposits — customer checks, owner money, or a loan?");
+  if(A.topPayer && A.topPayer.share>0.5) add("soft","Revenue concentrated in one customer",`${pct0(A.topPayer.share)} of revenue comes from ${A.topPayer.name}.`,"How long is that contract, and how reliably does that customer pay?");
+  if(A.savings.length) add("soft","Savings account submitted",`${A.savings.join(", ")} is a savings account. Lenders want the main operating checking account.`,"Please send the operating checking account statements.");
+  if(A.n<B.monthsWanted) add("soft",`Only ${A.n} of 4 months`,`Analyzed ${A.n} month(s). The application asks for 4.`,"Please send the missing months for every business account.");
+  if(A.unreconciled.length) add("soft","Statement didn't reconcile",`${A.unreconciled.join(", ")}: the extracted transactions don't add up to the ending balance, so figures may be incomplete. Check the transactions below or re-run.`);
+
+  // Positives
+  if(A.worstNegDays===0) add("good","No negative-balance days");
+  if(A.positions===0) add("good","No existing MCA / alt-lender positions");
+  if(A.avgOdNsf===0) add("good","No NSF / overdraft fees");
+  if(A.trend!==null && A.trend>=0.1) add("good","Revenue growing",`Up ${pct0(A.trend)} from ${A.first.label} to ${A.latest.label}.`);
+  if(A.avgRev>=B.revCaution) add("good","Solid verified revenue",`${money(A.avgRev)}/mo.`);
+  return F;
+}
+
+function saVerdict(F){
+  const hard=F.filter(f=>f.level==="hard").length, soft=F.filter(f=>f.level==="soft").length;
+  const score=Math.max(0,Math.min(100,100-hard*25-soft*8));
+  let v;
+  if(!hard && soft<=1) v={cls:"submit",title:"Worth shopping",sub:"The statements look clean. Worth a shop request.",
+    path:"Submit to your processor. If the client owns property and wants lower cost, a HELOC is also worth raising."};
+  else if(!hard) v={cls:"conditions",title:"Shop with caution",sub:`No major red flags, but ${soft} thing(s) a lender will ask about.`,
+    path:"Get answers to the questions below first, then submit with explanations so the file doesn't get bounced back."};
+  else v={cls:"pass",title:"Likely decline",sub:`${hard} major red flag(s) for MCA. A shop request will probably come back declined.`,
+    path:"If the client owns property, pivot to a HELOC. Otherwise revisit in 60–90 days if revenue and balances improve."};
+  v.score=score;
+  return v;
+}
+
+/* ---------- report ---------- */
+function saKpi(label,value,sub,tone=""){ return `<div class="kpi ${tone}"><div class="label">${label}</div><div class="value">${value}</div><div class="sub">${sub}</div></div>`; }
+function saPanel(title,sub,body){
+  return `<section class="panel"><div class="panel-head compact"><div><h3>${title}</h3>${sub?`<p>${sub}</p>`:""}</div></div>${body}</section>`;
+}
+const saTone=(v,major,caution,higherIsBad=true)=> higherIsBad
+  ? (v>=major?"bad":v>=caution?"warn":"good")
+  : (v<major?"bad":v<caution?"warn":"good");
+
+function saRenderReport(){
+  const el=document.getElementById("saReport");
+  const A=saAnalyze();
+  if(!A){
+    el.innerHTML=`<section class="panel empty-state"><strong>No statements analyzed yet</strong>Add the client's statement PDFs and click <b>Analyze statements</b>, or add months manually. The report appears here.</section>`;
+    TEXTS.sa="";
+    return;
+  }
+  const B=SA_BENCH, F=saFlags(A), V=saVerdict(F);
+  const hard=F.filter(f=>f.level==="hard"), soft=F.filter(f=>f.level==="soft"), good=F.filter(f=>f.level==="good");
+
+  const verdict=`
+    <div class="verdict ${V.cls}">
+      <div>
+        <div class="v-label">Statement read · ${esc(A.name)}</div>
+        <div class="v-title">${V.title}</div>
+        <div class="v-sub">${esc(V.sub)}</div>
+        <div class="v-path"><b>Next step:</b> ${esc(V.path)}</div>
+      </div>
+      <div class="score-ring"><div><b>${V.score}</b><span>score</span></div></div>
+    </div>`;
+
+  const kpis=`<div class="kpi-grid four">
+    ${saKpi("Verified revenue / mo",money(A.avgRev),`${A.n}-month average · all deposits ${money(sumBy(A.months,m=>m.totalIn)/A.n)}`, saTone(A.avgRev,B.revMajor,B.revCaution,false))}
+    ${saKpi("Revenue trend",A.trend===null?"—":`${A.trend>=0?"+":""}${pct0(A.trend)}`, A.trend===null?"Needs 2+ months":`${A.first.label} → ${A.latest.label}`, A.trend===null?"":A.trend<=B.declineCaution?"warn":"good")}
+    ${saKpi("Avg daily balance",money(A.avgAdb),`Lowest ${money(A.minLow)}`, A.avgAdb<B.adbCaution?"warn":"good")}
+    ${saKpi("Revenue deposits / mo",A.avgRevCount.toFixed(1),"Number of sales deposits", A.avgRevCount<B.depCaution?"warn":"good")}
+    ${saKpi("Active positions",A.positions,`${money(A.debtNow)}/mo in MCA + loan payments`, saTone(A.positions,B.posMajor,B.posCaution))}
+    ${saKpi("Debt payments ÷ revenue",pct0(A.holdback),"Existing payments as share of revenue", saTone(A.holdback,B.debtMajor,B.debtCaution))}
+    ${saKpi("Negative days / mo",A.avgNegDays.toFixed(1),`Worst month ${A.worstNegDays}`, A.avgNegDays>B.negMajor?"bad":A.avgNegDays>=B.negCaution?"warn":"good")}
+    ${saKpi("NSF / overdraft / mo",A.avgOdNsf.toFixed(1),"Fees charged by the bank", saTone(A.avgOdNsf,B.nsfMajor,B.nsfCaution))}
+  </div>`;
+
+  const flagHtml=f=>`<div class="flag ${f.level}"><strong><span class="flag-tag">${f.level==="hard"?"Major red flag":f.level==="soft"?"Caution":"Positive"}</span>${esc(f.title)}</strong>${f.detail?esc(f.detail):""}</div>`;
+  const flags=`<div class="flag-list">${[...hard,...soft,...good].map(flagHtml).join("")}</div>`;
+
+  const questions=[...new Set(F.filter(f=>f.ask).map(f=>f.ask))];
+  const questionsHtml= questions.length ? `<ol class="question-list">${questions.map(q=>`<li>${esc(q)}</li>`).join("")}</ol>` : `<p class="hint" style="margin:0">Nothing in the statements needs explaining.</p>`;
+
+  const monthRows=A.months.map(m=>`<tr>
+    <td>${m.label}${m.accounts>1?` <span class="muted">(${m.accounts} accts)</span>`:""}</td>
+    <td class="num">${money(m.totalIn)}</td><td class="num">${money(m.excluded)}</td><td class="num"><b>${money(m.revenue)}</b></td>
+    <td class="num">${m.revCount.toFixed(0)}</td><td class="num">${money(m.adb)}</td><td class="num ${m.low<0?"amt-neg":""}">${money(m.low)}</td>
+    <td class="num ${m.negDays>B.negMajor?"amt-neg":""}">${m.negDays}</td><td class="num ${m.odNsf>=B.nsfMajor?"amt-neg":""}">${m.odNsf}</td>
+    <td class="num">${money(m.debt)}</td><td class="num">${m.revenue>0?pct0(m.debt/m.revenue):"—"}</td></tr>`).join("");
+  const avgDebt=sumBy(A.months,m=>m.debt)/A.n;
+  const monthly=`<div class="table-wrap"><table class="data-table">
+    <thead><tr><th>Month</th><th class="num">All deposits</th><th class="num">Excluded</th><th class="num">Verified revenue</th><th class="num"># rev. deps</th><th class="num">Avg daily bal.</th><th class="num">Low bal.</th><th class="num">Neg. days</th><th class="num">NSF/OD</th><th class="num">Debt pmts</th><th class="num">Debt ÷ rev.</th></tr></thead>
+    <tbody>${monthRows}</tbody>
+    <tfoot><tr><td>Average</td><td class="num">${money(sumBy(A.months,m=>m.totalIn)/A.n)}</td><td class="num">${money(sumBy(A.months,m=>m.excluded)/A.n)}</td><td class="num">${money(A.avgRev)}</td><td class="num">${A.avgRevCount.toFixed(1)}</td><td class="num">${money(A.avgAdb)}</td><td class="num">${money(A.minLow)}</td><td class="num">${A.avgNegDays.toFixed(1)}</td><td class="num">${A.avgOdNsf.toFixed(1)}</td><td class="num">${money(avgDebt)}</td><td class="num">${A.avgRev>0?pct0(avgDebt/A.avgRev):"—"}</td></tr></tfoot>
+  </table></div>
+  <p class="hint" style="margin:10px 0 0">Figures are scaled to a 30-day month so statements with different period lengths compare fairly. "Excluded" = transfers from own accounts, loan/MCA funding and refunds — money that isn't sales.</p>`;
+
+  const lenderRows=A.lenders.map(L=>`<tr>
+    <td><b>${esc(L.name)}</b></td><td>${L.type==="mca_alt_payment"?"MCA / alt lender":"Loan"}</td><td>${L.freq}</td>
+    <td class="num">${money(L.typical)}</td><td class="num">${money(L.monthly)}</td><td>${esc(L.last)}</td>
+    <td>${L.active?`<span class="status-bad">Active</span>`:`<span class="muted">Not seen in last 35 days</span>`}</td></tr>`).join("");
+  const lendersHtml= A.lenders.length ? `<div class="table-wrap"><table class="data-table">
+    <thead><tr><th>Lender</th><th>Type</th><th>Frequency</th><th class="num">Typical pmt</th><th class="num">Monthly equiv.</th><th>Last pmt</th><th>Status</th></tr></thead>
+    <tbody>${lenderRows}</tbody></table></div>` : `<p class="hint" style="margin:0">No MCA or loan payments detected${A.positions?` in the PDFs (manual months report ${A.positions})`:""}.</p>`;
+  const fundingHtml= A.fundings.length ? `<div class="table-wrap" style="margin-top:14px"><table class="data-table">
+    <thead><tr><th>Funding received</th><th>Date</th><th class="num">Amount</th></tr></thead>
+    <tbody>${A.fundings.map(f=>`<tr><td>${esc(f.p)}</td><td>${esc(f.d)}</td><td class="num">${money(f.a)}</td></tr>`).join("")}</tbody></table></div>` : "";
+
+  const exp=Object.entries(A.expenses).sort((a,b)=>b[1]-a[1]);
+  const totExp=sumBy(exp,e=>e[1]);
+  const expensesHtml= exp.length ? `<div class="table-wrap"><table class="data-table">
+    <thead><tr><th>Category</th><th class="num">Avg / month</th><th class="num">% of outflows</th><th class="num">% of revenue</th></tr></thead>
+    <tbody>${exp.map(([k,v])=>`<tr><td>${esc(SA_ALL_CATS[k]||k)}</td><td class="num">${money(v)}</td><td class="num">${totExp?pct0(v/totExp):"—"}</td><td class="num">${A.avgRev?pct0(v/A.avgRev):"—"}</td></tr>`).join("")}</tbody>
+    <tfoot><tr><td>Total outflows</td><td class="num">${money(totExp)}</td><td></td><td class="num">${A.avgRev?pct0(totExp/A.avgRev):"—"}</td></tr></tfoot></table></div>`
+    : `<p class="hint" style="margin:0">Spending breakdown needs PDF statements (manual months only record totals).</p>`;
+
+  const stmtRows=A.items.map(i=>`<tr>
+    <td>${esc(i.fileName)}</td><td>${esc(i.bank||"")}</td><td>${esc(i.holder||"")}</td><td>${i.last4?"…"+esc(i.last4):""}</td><td>${esc(i.type||"")}</td>
+    <td>${isoD(i.start)} → ${isoD(i.end)}</td>
+    <td>${i.source==="manual"?`<span class="muted">Manual</span>`:Math.abs(i.recon)<1?`<span class="status-ok">✓ Reconciles</span>`:`<span class="status-warn">⚠ Off ${money(Math.abs(i.recon))}</span>`}</td>
+    <td>${esc(i.notes)}</td></tr>`).join("");
+  const stmts=`<div class="table-wrap"><table class="data-table">
+    <thead><tr><th>File</th><th>Bank</th><th>Account holder</th><th>Acct</th><th>Type</th><th>Period</th><th>Check</th><th>Notes</th></tr></thead>
+    <tbody>${stmtRows}</tbody></table></div>`;
+
+  const grading=`<details class="advanced" style="margin-top:0;border:0;padding:0"><summary>How this was graded</summary>
+    <div style="margin-top:12px;font-size:.8rem;color:#354258;line-height:1.55">
+      <p style="margin:0 0 8px">Lenders never share their criteria with brokers and they change by client profile, so this is <b>not</b> a lender decision. It is a read of the statements against general red-flag patterns that commonly lead MCA underwriters to decline or cut an offer.</p>
+      <div class="table-wrap"><table class="data-table">
+        <thead><tr><th>Signal</th><th>Major red flag</th><th>Caution</th></tr></thead>
+        <tbody>
+          <tr><td>Verified monthly revenue</td><td>Under ${money(B.revMajor)}</td><td>Under ${money(B.revCaution)}</td></tr>
+          <tr><td>Active MCA / alt-lender positions</td><td>${B.posMajor}+</td><td>${B.posCaution}–${B.posMajor-1}</td></tr>
+          <tr><td>Existing debt payments ÷ revenue</td><td>${pct0(B.debtMajor)}+</td><td>${pct0(B.debtCaution)}+</td></tr>
+          <tr><td>Negative-balance days per month</td><td>More than ${B.negMajor}</td><td>${B.negCaution}+</td></tr>
+          <tr><td>NSF / overdraft fees per month</td><td>${B.nsfMajor}+</td><td>${B.nsfCaution}+</td></tr>
+          <tr><td>Average daily balance</td><td>—</td><td>Under ${money(B.adbCaution)}</td></tr>
+          <tr><td>Revenue deposits per month</td><td>—</td><td>Fewer than ${B.depCaution}</td></tr>
+          <tr><td>Revenue trend (first → latest month)</td><td>—</td><td>Down ${pct0(-B.declineCaution)} or more</td></tr>
+          <tr><td>Other cautions</td><td colspan="2">Funding in last 60 days · cash over 40% of revenue · internal transfers over 30% of deposits · unclear deposits over 25% of revenue · one customer over 50% of revenue · savings account · fewer than 4 months · statement doesn't reconcile</td></tr>
+        </tbody></table></div>
+      <p style="margin:8px 0 0">Verdict: no major flags and at most one caution = <b>Worth shopping</b>; no major flags but more cautions = <b>Shop with caution</b>; any major flag = <b>Likely decline</b>. Score starts at 100, minus 25 per major flag and 8 per caution.</p>
+    </div></details>`;
+
+  const lines=[
+    `${A.name} — statement read: ${V.title.toUpperCase()} (score ${V.score}/100)`,
+    `Next step: ${V.path}`,
+    ``,
+    `Verified revenue: ${money(A.avgRev)}/mo over ${A.n} month(s) (all deposits ${money(sumBy(A.months,m=>m.totalIn)/A.n)}/mo)${A.trend!==null?`, trend ${A.trend>=0?"+":""}${pct0(A.trend)}`:""}`,
+    `Avg daily balance: ${money(A.avgAdb)} · lowest ${money(A.minLow)} · negative days/mo ${A.avgNegDays.toFixed(1)} · NSF/OD per mo ${A.avgOdNsf.toFixed(1)}`,
+    `Active positions: ${A.positions}${A.activeMca.length?` (${A.activeMca.map(l=>`${l.name} ${l.freq.toLowerCase()} ${money(l.typical)}`).join("; ")})`:""} · debt payments ≈ ${money(A.debtNow)}/mo = ${pct0(A.holdback)} of revenue`,
+    hard.length?`\nMajor red flags:\n${hard.map(f=>`- ${f.title}: ${f.detail}`).join("\n")}`:"",
+    soft.length?`\nCautions:\n${soft.map(f=>`- ${f.title}: ${f.detail}`).join("\n")}`:"",
+    questions.length?`\nQuestions for the client:\n${questions.map((q,i)=>`${i+1}. ${q}`).join("\n")}`:"",
+    `\nRead of the statements only. Not a lender decision.`
+  ];
+  TEXTS.sa=lines.filter(x=>x!=="").join("\n").replace(/\n{3,}/g,"\n\n");
+
+  el.innerHTML = verdict + kpis +
+    `<div class="two-column">${saPanel("Red flags & cautions",`${hard.length} major · ${soft.length} caution · ${good.length} positive`,flags+`<div style="margin-top:14px">${grading}</div>`)}${saPanel("Questions to ask the client","Get answers before you submit.",questionsHtml)}</div>` +
+    saPanel("Month by month","Cash flow per statement month (all accounts combined).",monthly) +
+    `<div class="two-column">${saPanel("Existing positions & loans","Recurring lender debits found in the statements.",lendersHtml+fundingHtml)}${saPanel("Where the money goes","Average monthly outflows by category.",expensesHtml)}</div>` +
+    saPanel("Notes for your sheet / processor","Paste into your Google Sheet or send with the shop request.",
+      `<div class="client-summary" style="margin-top:0"><p style="white-space:pre-wrap">${esc(TEXTS.sa)}</p></div>
+       <div class="actions no-print">
+         <button class="primary-btn" onclick="copyStored('sa')">Copy notes</button>
+         <button class="secondary-btn" onclick="window.print()">Print / save as PDF</button>
+         <button class="secondary-btn" onclick="saSaveJson()">Save analysis (.json)</button>
+       </div>`) +
+    saPanel("Statements analyzed","Check that every account and month is here.",stmts) +
+    `<div class="callout warning" style="margin-top:0"><strong>Read of the statements only.</strong> Lenders make the decision using criteria brokers don't see. Categories set by the AI can be wrong — correct them below and the report updates.</div>`;
+}
+
+function saRenderTxns(){
+  const el=document.getElementById("saTxns");
+  const done=SA.files.filter(f=>f.status==="done" && f.data);
+  if(!done.length){ el.innerHTML=""; return; }
+  const open=new Set([...el.querySelectorAll("details[data-fid][open]")].map(d=>d.dataset.fid));
+  el.innerHTML = saPanel("Review & correct categories","Every figure above comes from these transactions. Change a category and the report recalculates.",
+    done.map(f=>{
+      const d=f.data;
+      const rows=d.transactions.map((t,i)=>`<tr>
+        <td>${esc(t.d)}</td><td>${esc(t.t)}</td><td>${esc(t.p)}</td>
+        <td class="num ${t.a<0?"amt-neg":"amt-pos"}">${money(t.a)}</td>
+        <td><select class="mini-select" onchange="saSetCat(${f.id},${i},this.value)">${Object.entries(t.a<0?SA_CATS_OUT:SA_CATS_IN).map(([k,l])=>`<option value="${k}"${k===t.c?" selected":""}>${l}</option>`).join("")}</select></td>
+      </tr>`).join("");
+      return `<details class="txn-details" data-fid="${f.id}"${open.has(String(f.id))?" open":""}>
+        <summary>${esc(d.account_holder||f.name)} · ${esc(d.bank_name||"")} …${esc(d.account_last4||"")} · ${esc(d.period_start)} → ${esc(d.period_end)} · ${d.transactions.length} transactions</summary>
+        <div class="table-wrap"><table class="data-table">
+          <thead><tr><th>Date</th><th>Description</th><th>Counterparty</th><th class="num">Amount</th><th>Category</th></tr></thead>
+          <tbody>${rows}</tbody></table></div>
+      </details>`;
+    }).join(""));
+}
+function saSetCat(fid,i,c){
+  const f=SA.files.find(x=>x.id===fid); if(!f || !f.data.transactions[i]) return;
+  f.data.transactions[i].c=c;
+  saRenderReport();
+}
+function saRenderAll(){ saRenderReport(); saRenderTxns(); }
+
+/* ---------- save / load ---------- */
+function saSaveJson(){
+  const payload={app:"Deal Studio",kind:"statement-analysis",version:2,saved:new Date().toISOString(),
+    files:SA.files.filter(f=>f.status==="done").map(f=>({name:f.name,data:f.data})), manual:SA.manual};
+  const base=(val("clientName").trim()||SA.files.find(f=>f.data)?.data.account_holder||"client").replace(/[^a-z0-9]+/gi,"_").replace(/^_|_$/g,"");
+  const blob=new Blob([JSON.stringify(payload,null,1)],{type:"application/json"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=`${base}_statement_analysis.json`; a.click(); URL.revokeObjectURL(a.href);
+}
+function saLoadJson(e){
+  const file=e.target.files[0]; e.target.value="";
+  if(!file) return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const p=JSON.parse(r.result);
+      if(p.kind!=="statement-analysis") throw new Error("Not a saved statement analysis");
+      SA.files=(p.files||[]).map(f=>{ const data=saNormalize(f.data); return {id:SA.seq++, file:null, name:f.name, status:"done", data, error:"", recon:saRecon(data)}; });
+      SA.manual=(p.manual||[]).map(m=>({...m,id:SA.seq++}));
+      saRenderFiles(); saRenderManual(); saRenderAll();
+      saStatus(`Loaded ${SA.files.length} statement(s) and ${SA.manual.length} manual month(s) from ${file.name}.`,"good");
+    }catch(err){ saStatus(`Could not load that file: ${err.message}`,"warning"); }
+  };
+  r.readAsText(file);
+}
+
+/* ---------- init ---------- */
+function saInit(){
+  const k=lsGet(SA_KEY_KEY); if(k){ document.getElementById("saKey").value=k; document.getElementById("saRemember").checked=true; }
+  const m=lsGet(SA_MODEL_KEY), sel=document.getElementById("saModel"); if(m && [...sel.options].some(o=>o.value===m)) sel.value=m;
+
+  document.getElementById("saFileInput").addEventListener("change",e=>{ saAddFiles(e.target.files); e.target.value=""; });
+  const drop=document.getElementById("saDrop");
+  ["dragenter","dragover"].forEach(ev=>drop.addEventListener(ev,e=>{ e.preventDefault(); drop.classList.add("drag"); }));
+  ["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{ e.preventDefault(); drop.classList.remove("drag"); }));
+  drop.addEventListener("drop",e=>saAddFiles(e.dataTransfer.files));
+  ["dragover","drop"].forEach(ev=>window.addEventListener(ev,e=>e.preventDefault()));   // stop the browser opening a dropped PDF
+
+  document.getElementById("saRun").addEventListener("click",saRun);
+  document.getElementById("saAddManual").addEventListener("click",saAddManual);
+  document.getElementById("saLoadInput").addEventListener("change",saLoadJson);
+  document.getElementById("saClear").addEventListener("click",()=>{
+    if(!confirm("Clear all statements and manual months?")) return;
+    SA.files=[]; SA.manual=[]; saRenderFiles(); saRenderManual(); saRenderAll(); saStatus("");
+  });
+  document.getElementById("saRemember").addEventListener("change",e=>lsSet(SA_KEY_KEY, e.target.checked? val("saKey").trim() : null));
+  document.getElementById("saKey").addEventListener("change",()=>{ if(checked("saRemember")) lsSet(SA_KEY_KEY,val("saKey").trim()); });
+  document.getElementById("clientName").addEventListener("input",saRenderReport);
+
+  saRenderFiles(); saRenderManual(); saRenderAll();
+}
+
+
+/* =====================================================================
+   LENDER MATCH  (layer on top of the Statement Analyzer)
+   - Reads the finished statement analysis (saAnalyze) plus a few inputs
+     the statements can't show (credit score, TIB, state, industry, amount).
+   - Checks each tier and each lender with a pamphlet on file.
+   - Does not change any existing analysis numbers.
+   ===================================================================== */
+
+/* ---------- Lender-match adjustments (applied to a COPY of the data; the statement analysis itself is untouched) ---------- */
+// Factoring / AR-financing companies: remittances are the client's own customer invoices paid early -> revenue for lender matching.
+const LM_FACTOR_RE = /capflow|factoring|riviera finance|triumph business|otr capital|rts financial|apex capital corp|tafs|porter capital|fundthrough|altline|eagle business credit/i;
+// Fintech term loans / credit lines: Tier 1–2 lenders judge these by debt load rather than as stacked MCA positions.
+const LM_FINTECH_RE = /on ?deck|fundbox|intuit|quickbooks|bluevine|kabbage|american express|amex|funding circle|biz2credit|loanbuilder|paypal business loan|headway|lendio|sba\b/i;
+
+function lmAnalyze(){
+  const orig=SA.files;
+  // 1) ignore the same statement uploaded twice
+  const seen=new Set(), dups=[];
+  const files=orig.filter(f=>{
+    if(f.status!=="done" || !f.data) return true;
+    const d=f.data, k=[d.account_last4,d.period_start,d.period_end,Math.round((Number(d.ending_balance)||0)*100)].join("|");
+    if(seen.has(k)){ dups.push(f.name); return false; }
+    seen.add(k); return true;
+  });
+  // 2) factoring remittances count as revenue
+  let factored=0, revRaw=0; const factors=new Set();
+  const adj=files.map(f=>{
+    if(f.status!=="done" || !f.data) return f;
+    const tx=f.data.transactions.map(t=>{
+      if(t.a>0 && (t.c==="funding_in"||t.c==="unclear_in") && LM_FACTOR_RE.test(`${t.p} ${t.t}`)){ factored+=t.a; factors.add(t.p); return {...t,c:"revenue"}; }
+      return t;
+    });
+    revRaw+=sumBy(tx.filter(t=>t.a>0 && SA_REVENUE_CATS.includes(t.c)),t=>t.a);
+    return {...f, data:{...f.data, transactions:tx}};
+  });
+  // run the ORIGINAL analysis on the adjusted copy, then restore
+  let A; SA.files=adj;
+  try{ A=saAnalyze(); } finally{ SA.files=orig; }
+  if(!A) return null;
+  // 3) MCA positions vs fintech loans; several loans from one lender = one lender
+  const fam=n=>String(n).replace(/\s*\(.*\)\s*$/,"").trim()||n;
+  const group=list=>{ const m=new Map(); list.forEach(L=>{ const k=fam(L.name); if(!m.has(k)) m.set(k,{name:k,loans:0}); m.get(k).loans++; }); return [...m.values()]; };
+  const active=A.lenders.filter(L=>L.active);
+  const mca=group(active.filter(L=>L.type==="mca_alt_payment" && !LM_FINTECH_RE.test(L.name)));
+  const fintech=group(active.filter(L=>LM_FINTECH_RE.test(L.name)));
+  const manualPos=Math.max(0,...A.items.filter(i=>i.source==="manual" && i.key===A.latest.key).map(i=>i.positionsCount||0));
+  const positions=Math.max(mca.length, manualPos);
+  // 4) gaps between statement months
+  const missing=[]; { const keys=A.months.map(m=>m.key); let [y,m]=keys[0].split("-").map(Number); const [ly,lmo]=keys[keys.length-1].split("-").map(Number);
+    for(;;){ m++; if(m>12){m=1;y++;} if(y>ly||(y===ly&&m>=lmo)) break; const k=`${y}-${String(m).padStart(2,"0")}`; if(!keys.includes(k)) missing.push(monthLabel(k)); } }
+  return {...A, positions, mcaLenders:mca, fintech, allPositions:positions+fintech.length,
+    lmAdj:{dups, factoredShare: revRaw? factored/revRaw : 0, factors:[...factors], missing}};
+}
+
+/* ---------- Tier sheet (from "Lender Tiers - Sheet1.csv") ---------- */
+const LM_DEFAULT_SHEET = {
+  "Tier 1":["Rapid","IOU","Kapitus","Mulligan","Get Backd","Vox","Channel Partners","Peac","Itria","Can Capital","Pearl","Samson","Ondeck","Fora","Wall Funding","fundomate","Aquina Health","Credibly"],
+  "Tier 2":["IOU","GCM","ByzFunder","Specialty","Pirs Financial","Propella","Forward","Cedar","Legend","Libertas","Accord","Vital Cap","Reliant","Symplify","Bizfund","TVT","Expansion (nvr seen offer)","Fintap","Snap Advance"],
+  "Tier 3":["Cooper Asset","Lendini","Fenix","Fox","Aspire","Flexibility","Union Funding Solutions","Immediate Advances","ClearFund","NewCo","Reliable","Kapfi","Capitalize Group","FundFi","GFE","Bitty","The Smarter Merchant","Velocity","First Line Advance","Stam Ford","E-Financial Tree","Advantage Capital","EBF"],
+  "Tier 4":["SBF","FundPro","Wynwood","Cucumber","Seamless","TBF","Alpine","Arena","funding future","Rowan","App funding beta","Megged","Forest","WBL","Mint","MNY","Barclays","Liberty","Pathway","Fratello Capital","Ironwood","Bow apple","bluebridge","Daka"],
+  "Tier 5":["ML Factors","FinPoint","Lifetime Fund","Lite Fund","Diverse","vault","Nexi","Capital Shack","MNR","Redstone","Timeless","overnight","dash","raptor","capytal","Cambridge Funding","UFS Funding","Apex Funding","Pretzel Funding","RBLX"],
+  "Reverse":["GFE","G&G Funding","Silverline","QFS","Fenix","Fratello Capital","nexi","highland hill","DLP","Timeless","FundPro","Arena","ML Factor","Lendora","American choice","cooper","Throttle"]
+};
+const LM_SHEET_KEY="ds_lender_tier_sheet_v1";
+
+/* ---------- Industry & state options ---------- */
+const LM_INDUSTRIES = {
+  "":"Not entered",
+  general:"General / other",
+  restaurant:"Restaurant / bar / food",
+  retail:"Retail / e-commerce",
+  healthcare:"Healthcare / medical / dental",
+  services:"Professional & personal services",
+  manufacturing:"Manufacturing / wholesale",
+  trucking:"Trucking / transportation / logistics",
+  construction:"Construction / contractors / roofing",
+  auto:"Auto sales / dealers",
+  staffing:"Staffing",
+  consulting:"Consulting",
+  homebased:"Home-based business",
+  legal:"Law firm / legal services",
+  realestate:"Real estate / brokers / title",
+  financial:"Financial services / MSB / lending",
+  insurance:"Insurance agency",
+  collections:"Collections",
+  gas:"Gas station",
+  cannabis:"Cannabis",
+  vape:"Vape / smoke shop",
+  gambling:"Gambling / gaming",
+  adult:"Adult entertainment",
+  nailsalon:"Nail salon",
+  nonprofit:"Non-profit",
+  travel:"Travel agency",
+  agriculture:"Agriculture / farming"
+};
+const LM_STATES = ["AL","AK","AZ","AR","CA","CO","CT","DE","DC","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","PR","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY"];
+
+/* ---------- Rules ----------
+   Rule fields (all optional):
+     fico, tib (months), rev (verified monthly revenue), deposits (per month), negDays (per month),
+     nsf (NSF + overdraft fees per month), adb, posMin / posMax (EXISTING positions),
+     dealMin / dealMax, states (restricted), industries (restricted), caseInds (case-by-case industries),
+     highRisk: { inds:[...], ...fields that replace the normal ones for those industries }
+   soft: [...field names] -> "preferred" only: a miss is a warning, not a decline.
+   est:  [...field names] -> estimated (no pamphlet). Shown as "estimated" in the report.
+*/
+
+const LM_TIERS = {
+  "Tier 1":{
+    basis:"Your guidance (clean files: credit ~600–650, ADB at least 5% of revenue, 2+ yrs in business, no positions unless buying out a competitor, no prior default) plus the IOU Financial pamphlet (IOU funds in both Tier 1 and Tier 2). Revenue, negative-day, NSF and debt-load limits are estimated.",
+    rules:{ fico:600, ficoPref:650, tib:24, adbPct:0.05, posMax:0, buyout:2, cleanFile:true, noDefault:true, posCount:"mca", maxDebt:0.25, rev:20000, deposits:8, negDays:2, nsf:1,
+      industries:["trucking","legal","realestate","collections","cannabis","gambling","adult","vape","nonprofit","financial","travel","auto"],
+      soft:["tib","rev","negDays","nsf","industries","maxDebt"], est:["rev","negDays","nsf","maxDebt"] },
+    note:"Lowest risk, best terms and longest terms. Wants super clean files. An existing position only works if the new funding buys it out."
+  },
+  "Tier 2":{
+    basis:"Your guidance (credit ~550–600, 1–2 yrs in business, takes a 2nd position if the merchant is still profitable, no prior default). IOU Financial also funds here. Revenue, deposits, negative-day and NSF limits are estimated.",
+    rules:{ fico:550, ficoPref:600, tib:12, rev:20000, deposits:6, negDays:3, nsf:3, posMax:1, posCount:"mca", profit:true, noDefault:true, maxDebt:0.30,
+      soft:["nsf","maxDebt"], est:["rev","deposits","negDays","nsf","maxDebt"] },
+    note:"Still prefers clean files. Will take a 2nd position as long as the business is profitable."
+  },
+  "Tier 3":{
+    basis:"Firstline Advance pamphlet — First Line Advance is Tier 3 on your sheet",
+    rules:{ tib:3, rev:15000, deposits:4, negDays:5,
+      industries:["auto","gas","legal","cannabis","realestate"],
+      highRisk:{ inds:["construction","trucking"], rev:40000 },
+      soft:["industries"] },
+    note:"No credit minimum, any position. First tier that takes heavier stacking. Higher tier = higher risk for the lender, and it shows in the terms."
+  },
+  "Tier 4":{
+    basis:"Rowan Advance pamphlet — Rowan is Tier 4 on your sheet. Rowan's $100K revenue preference is Rowan-specific, so the tier's revenue floor is estimated between Tier 3 and Tier 5.",
+    rules:{ tib:12, posMin:1, posMax:4, rev:10000, negDays:5,
+      industries:["nailsalon","gambling","financial","nonprofit","legal","realestate","auto","cannabis","gas","vape"],
+      soft:["tib","posMin","negDays","industries"], est:["rev"] },
+    note:"Stacking funders for 2nd–5th positions; prefer strong deposits."
+  },
+  "Tier 5":{
+    basis:"Estimated — no Tier 5 pamphlet yet. Modeled on QM Advance's flyer (the loosest guidelines you sent).",
+    rules:{ tib:3, rev:5000, deposits:4, nsf:8,
+      est:["tib","rev","deposits","nsf"] },
+    note:"High-risk paper: low revenue, heavy stacking or NSFs. Expensive and short."
+  },
+  "Reverse":{
+    basis:"Estimated — no Reverse pamphlet yet.",
+    rules:{ posMin:1, rev:15000, tib:6, fico:500,
+      soft:["fico"], est:["rev","tib","fico"] },
+    reverse:true,
+    note:"Reverse consolidation: takes over existing MCA payments to lower the daily/weekly hit. Only for merchants already carrying positions."
+  }
+};
+
+const LM_LENDERS = [
+  { name:"IOU Financial", sheetName:"IOU", email:"", source:"IOU Products Guideline Overview (1/26/2026)",
+    shared:{ posCount:"mca", noDefault:true, states:["MT","NV","SD","VT","HI","ND","RI"],
+      industries:["trucking","legal","realestate","collections","cannabis","gambling","adult","vape","nonprofit","financial","travel","auto"],
+      caseInds:["construction","staffing","insurance"] },
+    programs:[
+      { name:"Core ($15K–$150K)", rules:{ dealMin:15000, dealMax:150000, posMax:1, tib:12, fico:650, adb:3000, deposits:8 } },
+      { name:"Mid Market ($150K–$300K)", rules:{ dealMin:150001, dealMax:300000, posMax:0, tib:24, fico:650, adb:15000, deposits:8, soft:["posMax"] } },
+      { name:"Premier ($300K–$850K)", rules:{ dealMin:300001, dealMax:850000, posMax:0, tib:60, fico:700, adb:50000, deposits:8, soft:["posMax"] } }
+    ],
+    notes:["650 FICO applies to loans of $50K+.","40–50% net rule: existing balances paid off must leave the client 40–50% of the loan.","Must be licensed for California deals.","Loan product (not MCA): needs an operational website; no late mortgage/auto payments in 6 months."] },
+
+  { name:"Firstline Advance", sheetName:"First Line Advance", email:"subs@firstlineadvance.com", source:"Firstline Underwriting Guidelines",
+    shared:{ industries:["auto","gas","legal","cannabis","realestate"] },
+    programs:[{ name:"Standard", rules:{ dealMin:5000, dealMax:1000000, tib:3, rev:15000, deposits:4, negDays:5, highRisk:{ inds:["construction","trucking"], rev:40000 } } }],
+    notes:["Funds closed bankruptcies and satisfied prior defaults.","Any position.","NY and CA need 4 months of statements."] },
+
+  { name:"Rowan Advance", sheetName:"Rowan", email:"eli@rowanadvance.com", source:"Rowan Advance ISO Guidelines 2026",
+    shared:{ industries:["nailsalon","gambling","financial","nonprofit","legal","realestate","auto","cannabis","gas","vape"] },
+    programs:[
+      { name:"B Paper", rules:{ tib:36, posMin:1, posMax:2, dealMin:50000, dealMax:1000000, rev:100000, negDays:5, soft:["posMin","rev","negDays"] } },
+      { name:"C Paper", rules:{ tib:12, posMin:3, posMax:4, dealMin:50000, dealMax:750000, rev:100000, negDays:5, soft:["rev","negDays"] } },
+      { name:"D Paper (case-by-case)", caseByCase:true, rules:{ rev:100000, negDays:5, soft:["rev","negDays"] } }
+    ],
+    notes:["Clean 2nd positions preferred; recently paid-off 1sts accepted.","All 50 states including NY."] },
+
+  { name:"Pristine Capital Partners", sheetName:"", email:"subs@pristinecapitalpartners.com", source:"Pristine Underwriting Guidelines 2026",
+    shared:{ posMin:1, posMax:4, dealMax:1000000, soft:["posMin"],
+      highRisk:{ inds:["trucking","construction","auto","staffing","travel","financial","gambling","adult"], rev:200000, tib:18 } },
+    programs:[
+      { name:"Prime", rules:{ fico:600, rev:100000, tib:18, negDays:2 } },
+      { name:"Standard", rules:{ fico:550, rev:75000, tib:12, negDays:3 } },
+      { name:"Flex", rules:{ fico:500, rev:75000, tib:8, negDays:4 } }
+    ],
+    notes:["2nd–5th position; 1st only with payment history.","Common declines: mostly cash/Zelle deposits, heavy NSF/OD, heavy stacking, declining month-to-date revenue."] },
+
+  { name:"ThoroCorp", sheetName:"", email:"", source:"ThoroCorp Underwriting Guidelines 2026",
+    shared:{ dealMin:80000, dealMax:5000000, industries:["collections"] },
+    programs:[
+      { name:"Standard-risk industries", rules:{ tib:6, rev:100000, negDays:3, fico:500, deposits:10,
+        highRisk:{ inds:["trucking","construction","auto"], rev:150000, deposits:15, posMin:1 } } }
+    ],
+    notes:["Pricing: holdback under 30% with ≤3 positions = Premium (1.34); 40%+ = High-risk (1.40).","No crypto trading or factoring companies."] },
+
+  { name:"CashFloit", sheetName:"", email:"", source:"CashFloit Guidelines 5/13/25",
+    shared:{ states:["AK","HI","NY","UT","VA","PR"],
+      industries:["adult","agriculture","auto","cannabis","collections","gambling","insurance","legal","financial","realestate"],
+      caseInds:["gas"] },
+    programs:[{ name:"Standard", rules:{ dealMin:40000, dealMax:1500000, rev:100000, deposits:6, tib:12, posMax:3, negDays:2,
+      highRisk:{ inds:["construction","trucking"], rev:300000 } } }],
+    notes:["Also needs 12 months of bank history and no more than 4 low-balance days a month.","Gas stations need a service station or convenience store."] },
+
+  { name:"7even Capital", sheetName:"", email:"admin@7evencapital.com", source:"7even Capital Product Scope",
+    shared:{},
+    programs:[{ name:"Standard", rules:{ dealMin:10000, dealMax:5000000, tib:3, rev:75000, posMin:1, posMax:9, negDays:4,
+      highRisk:{ inds:["trucking","auto","construction"], rev:250000 } } }],
+    notes:["2nd–10th position only.","Owner must hold 51%+."] },
+
+  { name:"QM Advance", sheetName:"", email:"sales@qmadvance.com", source:"QM Advance partner flyer",
+    shared:{ states:["HI","PR","AK"], caseStates:["TX"], caseInds:["trucking","construction","legal","realestate","consulting","homebased"] },
+    programs:[{ name:"Standard", rules:{ rev:5000, tib:3, nsf:8, deposits:8, soft:["nsf"] } }],
+    notes:["Max 8 NSFs and 10 overdrafts — the tool counts them together, so check the split.","ITIN accepted."] }
+];
+
+/* ---------- inputs ---------- */
+const LM_INPUT_IDS=["lmFico","lmAmount","lmTib","lmState","lmIndustry","lmDefault"];
+function lmInputs(){
+  const n=id=>{ const v=document.getElementById(id).value; return v===""? null : Number(v); };
+  return { fico:n("lmFico"), amount:n("lmAmount"), tib:n("lmTib"), state:val("lmState"), industry:val("lmIndustry"), prevDefault:val("lmDefault") };
+}
+function lmInputsGet(){ const o={}; LM_INPUT_IDS.forEach(id=>o[id]=val(id)); return o; }
+function lmInputsSet(o){ LM_INPUT_IDS.forEach(id=>{ if(o && o[id]!==undefined) document.getElementById(id).value=o[id]; }); }
+
+/* ---------- tier sheet ---------- */
+function lmSheet(){
+  try{ const s=JSON.parse(lsGet(LM_SHEET_KEY)||"null"); if(s && Object.keys(s).length) return s; }catch(e){}
+  return LM_DEFAULT_SHEET;
+}
+function lmParseCsv(text){
+  const rows=text.replace(/\r/g,"").split("\n").filter(l=>l.trim()).map(line=>{
+    const out=[]; let cur="", q=false;
+    for(const ch of line){
+      if(ch==='"') q=!q;
+      else if(ch==="," && !q){ out.push(cur); cur=""; }
+      else cur+=ch;
+    }
+    out.push(cur); return out.map(c=>c.trim());
+  });
+  if(rows.length<2) throw new Error("The CSV needs a header row of tier names and at least one lender row.");
+  const head=rows[0], sheet={};
+  head.forEach((h,i)=>{ if(!h) return;
+    const names=[...new Set(rows.slice(1).map(r=>(r[i]||"").trim()).filter(Boolean))];
+    sheet[h]=names;
+  });
+  return sheet;
+}
+const lmNorm=s=>String(s||"").toLowerCase().replace(/[^a-z0-9]/g,"");
+function lmTierOf(sheetName,sheet){
+  if(!sheetName) return [];
+  return Object.keys(sheet).filter(t=>sheet[t].some(n=>lmNorm(n)===lmNorm(sheetName)));
+}
+function lmProfileFor(tierLabel){
+  const k=Object.keys(LM_TIERS).find(t=>lmNorm(t)===lmNorm(tierLabel));
+  return k? LM_TIERS[k] : null;
+}
+
+/* ---------- rule engine ---------- */
+const LM_FIELD_LABEL = { fico:"Credit score", tib:"Time in business", rev:"Monthly revenue", deposits:"Deposits / month",
+  negDays:"Negative days / month", nsf:"NSF + overdraft / month", adb:"Avg daily balance", adbPct:"Avg daily balance", posMin:"Existing positions",
+  posMax:"Existing positions", maxDebt:"Debt payments ÷ revenue", dealMin:"Deal size", dealMax:"Deal size", states:"State", industries:"Industry" };
+
+function lmMerge(shared,rules){
+  const r={...(shared||{}),...(rules||{})};
+  r.soft=[...(shared&&shared.soft||[]),...(rules&&rules.soft||[])];
+  r.est=[...(shared&&shared.est||[]),...(rules&&rules.est||[])];
+  r.industries=[...(shared&&shared.industries||[]),...(rules&&rules.industries||[])];
+  r.caseInds=[...(shared&&shared.caseInds||[]),...(rules&&rules.caseInds||[])];
+  r.states=[...(shared&&shared.states||[]),...(rules&&rules.states||[])];
+  r.caseStates=[...(shared&&shared.caseStates||[]),...(rules&&rules.caseStates||[])];
+  r.highRisk=(rules&&rules.highRisk)||(shared&&shared.highRisk)||null;
+  return r;
+}
+
+function lmEvaluate(R,A,I){
+  const fails=[], warns=[], unknown=[], passes=[];
+  let rules={...R};
+  const hrHit = rules.highRisk && I.industry && rules.highRisk.inds.includes(I.industry);
+  if(hrHit){ const {inds,...over}=rules.highRisk; rules={...rules,...over}; }
+  const soft=k=>rules.soft.includes(k), est=k=>rules.est.includes(k);
+  const tag=k=>`${est(k)?" (estimated)":""}${soft(k)?" (preferred)":""}${hrHit && rules.highRisk && k in rules.highRisk?` (${LM_INDUSTRIES[I.industry]})`:""}`;
+  // ratio = how much of the requirement is met (1 = exactly). A "preferred" limit missed by more than half counts as a fail.
+  const miss=(k,msg,ratio)=>{
+    if(soft(k) && ratio!=null && ratio<0.5) fails.push(msg+tag(k).replace("(preferred)","(well outside preferred)"));
+    else (soft(k)? warns : fails).push(msg+tag(k));
+  };
+  const minR=(v,t)=> t>0? v/t : 1, maxR=(v,t)=> v>0? (t||0.5)/v : 1;
+
+  if(rules.fico!=null){
+    if(I.fico==null) unknown.push(`Needs ${rules.fico}+ credit score${tag("fico")}`);
+    else if(I.fico<rules.fico) miss("fico",`Credit ${I.fico} < ${rules.fico} minimum`);
+    else{
+      passes.push(`Credit ${I.fico} ≥ ${rules.fico}`);
+      if(rules.ficoPref!=null && I.fico<rules.ficoPref) warns.push(`Credit ${I.fico} is under the preferred ${rules.ficoPref}`);
+    }
+  }
+  if(rules.tib!=null){
+    if(I.tib==null) unknown.push(`Needs ${rules.tib}+ months in business${tag("tib")}`);
+    else if(I.tib<rules.tib) miss("tib",`${I.tib} months in business < ${rules.tib} minimum`,minR(I.tib,rules.tib));
+    else passes.push(`${I.tib} months in business ≥ ${rules.tib}`);
+  }
+  if(rules.rev!=null){
+    if(A.avgRev<rules.rev) miss("rev",`Revenue ${money(A.avgRev)}/mo < ${money(rules.rev)} minimum`,minR(A.avgRev,rules.rev));
+    else passes.push(`Revenue ${money(A.avgRev)}/mo ≥ ${money(rules.rev)}`);
+  }
+  if(rules.deposits!=null){
+    if(A.avgRevCount<rules.deposits) miss("deposits",`${A.avgRevCount.toFixed(1)} deposits/mo < ${rules.deposits} minimum`,minR(A.avgRevCount,rules.deposits));
+    else passes.push(`${A.avgRevCount.toFixed(1)} deposits/mo ≥ ${rules.deposits}`);
+  }
+  if(rules.negDays!=null){
+    if(A.avgNegDays>rules.negDays) miss("negDays",`${A.avgNegDays.toFixed(1)} negative days/mo > ${rules.negDays} max`,maxR(A.avgNegDays,rules.negDays));
+    else{
+      passes.push(`${A.avgNegDays.toFixed(1)} negative days/mo ≤ ${rules.negDays}`);
+      if(A.worstNegDays>rules.negDays) warns.push(`Worst month had ${A.worstNegDays} negative days (limit ${rules.negDays})`);
+    }
+  }
+  if(rules.nsf!=null){
+    if(A.avgOdNsf>rules.nsf) miss("nsf",`${A.avgOdNsf.toFixed(1)} NSF/OD fees/mo > ${rules.nsf} max`,maxR(A.avgOdNsf,rules.nsf));
+    else passes.push(`${A.avgOdNsf.toFixed(1)} NSF/OD per month ≤ ${rules.nsf}`);
+  }
+  if(rules.adb!=null){
+    if(A.avgAdb<rules.adb) miss("adb",`Avg daily balance ${money(A.avgAdb)} < ${money(rules.adb)} minimum`,minR(A.avgAdb,rules.adb));
+    else passes.push(`Avg daily balance ≥ ${money(rules.adb)}`);
+  }
+  if(rules.adbPct!=null){
+    const need=A.avgRev*rules.adbPct;
+    if(A.avgAdb<need) miss("adbPct",`Avg daily balance ${money(A.avgAdb)} is under ${pct0(rules.adbPct)} of revenue (${money(need)})`,minR(A.avgAdb,need));
+    else passes.push(`Avg daily balance ${money(A.avgAdb)} ≥ ${pct0(rules.adbPct)} of revenue`);
+  }
+  if(rules.profit){
+    const out=Object.entries(A.expenses||{}).filter(([k])=>k!=="transfer_out").reduce((a,[,v])=>a+v,0);
+    if(out>0){
+      const net=A.avgRev-out;
+      if(net<0) miss("profit",`Spending (${money(out)}/mo) is more than verified revenue — doesn't look profitable`);
+      else passes.push(`Looks profitable: ${money(net)}/mo left after outflows`);
+    } else unknown.push("Profitability can't be judged without PDF statements");
+  }
+  if(rules.noDefault){
+    if(!I.prevDefault) unknown.push("Ask the client: any previous default?");
+    else if(I.prevDefault==="yes") fails.push("Previous default — this tier won't fund it");
+    else passes.push("No previous default");
+  } else if(I.prevDefault==="yes") warns.push("Previous default — confirm the lender accepts it (usually must be settled)");
+  // Bank-style lenders (posCount "mca") look at true MCA positions plus debt load; MCA funders count fintech loans as positions too.
+  const mcaOnly=rules.posCount==="mca", pos= mcaOnly? A.positions : A.allPositions;
+  const posTxt= mcaOnly? `${A.positions} MCA position(s)${A.fintech.length?` (+ ${A.fintech.length} fintech loan(s) not counted)`:""}`
+                       : `${pos} position(s)${A.fintech.length?` incl. ${A.fintech.length} fintech loan(s)`:""}`;
+  if(rules.posMin!=null && pos<rules.posMin) miss("posMin",`Needs ${rules.posMin}+ existing position(s); file has ${pos}`);
+  if(rules.posMax!=null){
+    if(pos>rules.posMax && rules.buyout!=null && pos<=rules.buyout) warns.push(`${posTxt} — only works if the new funding buys out the existing position(s)`);
+    else if(pos>rules.posMax) miss("posMax",rules.buyout!=null?`${posTxt} — too many positions for a clean-file tier`:`${posTxt} > ${rules.posMax} max (funds up to ${ordinal(rules.posMax+1)} position)`);
+    else if(rules.posMin==null || pos>=rules.posMin) passes.push(`${posTxt} — would be ${ordinal(pos+1)}`);
+  }
+  if(rules.cleanFile && pos>=2 && A.avgRev<rules.rev) fails.push(`${pos} open positions with low revenue (${money(A.avgRev)}/mo) — top tiers only take clean files`);
+  if(rules.maxDebt!=null){
+    if(A.holdback>rules.maxDebt) miss("maxDebt",`Debt payments ${pct0(A.holdback)} of revenue > ${pct0(rules.maxDebt)} max`,maxR(A.holdback,rules.maxDebt));
+    else passes.push(`Debt payments ${pct0(A.holdback)} of revenue ≤ ${pct0(rules.maxDebt)}`);
+  }
+  if(I.amount!=null && I.amount>0){
+    if(rules.dealMin!=null && I.amount<rules.dealMin) miss("dealMin",`Requested ${money(I.amount)} < ${money(rules.dealMin)} minimum deal`);
+    if(rules.dealMax!=null && I.amount>rules.dealMax) miss("dealMax",`Requested ${money(I.amount)} > ${money(rules.dealMax)} maximum deal`);
+  }
+  if(I.state){
+    if(rules.states.includes(I.state)) fails.push(`Doesn't fund in ${I.state}`);
+    else if(rules.caseStates.includes(I.state)) warns.push(`${I.state} is case-by-case`);
+  }
+  if(I.industry){
+    const lbl=LM_INDUSTRIES[I.industry];
+    if(rules.industries.includes(I.industry)) miss("industries",`Restricted industry: ${lbl}`);
+    else if(rules.caseInds.includes(I.industry)) warns.push(`${lbl} is case-by-case`);
+    if(hrHit) warns.push(`${lbl} is high-risk for this lender — higher limits applied`);
+  }
+  const status= fails.length? "no" : warns.length? "maybe" : "yes";
+  return {status, fails, warns, unknown, passes};
+}
+function ordinal(n){ return n+(["th","st","nd","rd"][(n%100-20)%10]||["th","st","nd","rd"][n%100]||"th"); }
+
+function lmEvalLender(L,A,I){
+  const results=L.programs.map(p=>{
+    const r=lmEvaluate(lmMerge(L.shared,p.rules),A,I);
+    if(p.caseByCase && r.status==="yes"){ r.status="maybe"; r.warns.push("Case-by-case program"); }
+    return {program:p.name, ...r};
+  });
+  const rank={yes:0,maybe:1,no:2};
+  const fit=results.filter(r=>r.status!=="no");
+  if(fit.length) return [...fit].sort((a,b)=>rank[a.status]-rank[b.status] || a.warns.length-b.warns.length)[0];
+  // nothing fits: show the program that matches the requested amount, else the first (most common) one
+  const amt=I.amount, idx=amt? L.programs.findIndex(p=>{ const r=lmMerge(L.shared,p.rules); return (r.dealMin==null||amt>=r.dealMin)&&(r.dealMax==null||amt<=r.dealMax); }) : -1;
+  return results[idx>=0?idx:0];
+}
+
+function lmEvalTier(label,names,A,I){
+  const P=lmProfileFor(label);
+  if(!P) return {label,names,status:"unknown",fails:[],warns:[],unknown:[],passes:[],basis:"No guidelines on file for this tier.",note:""};
+  const r=lmEvaluate(lmMerge({},P.rules),A,I);
+  if(P.reverse && r.status!=="no"){
+    if(A.positions>=2 || A.holdback>=0.2) r.passes.unshift(`Stacked (${A.positions} positions, ${pct0(A.holdback)} of revenue to debt) — consolidation could lower payments`);
+    else if(A.positions===1){ r.status="maybe"; r.warns.push("Only 1 position — consolidation helps less"); }
+  }
+  if(P.reverse && A.positions===0){ r.status="na"; r.fails=["No existing positions to consolidate"]; }
+  // tiers built from estimates can't be stronger than "possible fit"
+  const allEst = P.basis.startsWith("Estimated");
+  if(allEst && r.status==="yes"){ r.status="maybe"; r.warns.push("Tier guidelines are estimated — confirm with your processor"); }
+  return {label,names,...r,basis:P.basis,note:P.note};
+}
+
+/* ---------- render ---------- */
+const LM_STATUS = {
+  yes:{txt:"Good fit",cls:"ok"}, maybe:{txt:"Possible fit",cls:"warn"}, no:{txt:"Not a fit",cls:"err"},
+  na:{txt:"Not needed",cls:"idle"}, unknown:{txt:"No guidelines",cls:"idle"}
+};
+function lmList(items,cls,icon){ return items.map(x=>`<li class="${cls}"><span>${icon}</span>${esc(x)}</li>`).join(""); }
+
+function saRenderLenders(){
+  const el=document.getElementById("saLenders");
+  if(!el) return;
+  const base=saAnalyze();
+  if(!base){ el.innerHTML=""; TEXTS.lm=""; return; }
+  const A=lmAnalyze();
+  const I=lmInputs(), sheet=lmSheet();
+  // Nothing is recommended until the statement analysis is finished and a valid credit score is entered.
+  const gate=(title,msg)=>{ TEXTS.lm=""; el.innerHTML=`<section class="panel lm-panel empty-state"><div class="eyebrow">Lender match</div><strong style="margin-top:6px">${title}</strong>${msg}</section>`; };
+  if(SA.running || SA.files.some(f=>f.status==="reading"||f.status==="queued"))
+    return gate("Waiting for the analysis to finish","Lender matching runs once every statement has been read.");
+  if(I.fico==null)
+    return gate("Enter the client's credit score","Add the FICO in <b>Lender match details</b> above to see which tiers and lenders to shop this file to.");
+  if(I.fico<300 || I.fico>850)
+    return gate("Check the credit score","FICO scores run from 300 to 850.");
+  const tiers=Object.keys(sheet).map(t=>lmEvalTier(t,sheet[t],A,I));
+  const lenders=LM_LENDERS.map(L=>({L, tiers:lmTierOf(L.sheetName,sheet), r:lmEvalLender(L,A,I)}));
+
+  const good=tiers.filter(t=>t.status==="yes"), maybe=tiers.filter(t=>t.status==="maybe");
+  const goodL=lenders.filter(x=>x.r.status==="yes"), maybeL=lenders.filter(x=>x.r.status==="maybe");
+  const missing=[I.fico==null?"credit score":"", I.tib==null?"time in business":"", !I.state?"state":"", !I.industry?"industry":"", !I.prevDefault?"previous default":""].filter(Boolean);
+
+  const fit=tiers.filter(t=>t.status==="yes"||t.status==="maybe");
+  const isRev=t=>!!(lmProfileFor(t.label)||{}).reverse;
+  const main=[...fit.filter(t=>!isRev(t)&&t.status==="yes"),...fit.filter(t=>!isRev(t)&&t.status==="maybe")], rev=fit.filter(isRev);
+  const tierTxt=t=>`<b>${esc(t.label)}</b> (${LM_STATUS[t.status].txt.toLowerCase()})`;
+  const headline = main.length
+    ? `Shop first: ${tierTxt(main[0])}${main.length>1?` · also: ${main.slice(1).map(tierTxt).join(", ")}`:""}${rev.length?` · consolidation: ${rev.map(tierTxt).join(", ")}`:""}`
+    : rev.length? `Only consolidation fits: ${rev.map(tierTxt).join(", ")}` : `No tier fits this file on the guidelines you have.`;
+
+  const tierCards=tiers.map(t=>{
+    const S=LM_STATUS[t.status];
+    const pamph=new Set(LM_LENDERS.map(L=>lmNorm(L.sheetName)).filter(Boolean));
+    return `<div class="lm-card lm-${t.status}">
+      <div class="lm-card-head"><h4>${esc(t.label)}</h4><span class="badge ${S.cls}">${S.txt}</span></div>
+      ${t.note?`<p class="lm-note">${esc(t.note)}</p>`:""}
+      <ul class="lm-reasons">${lmList(t.fails,"bad","✗")}${lmList(t.warns,"warn","!")}${lmList(t.unknown,"unk","?")}${t.status==="yes"||t.status==="maybe"?lmList(t.passes.slice(0,3),"good","✓"):""}</ul>
+      <div class="lm-basis">${esc(t.basis)}</div>
+      <details class="lm-names"><summary>${t.names.length} lenders</summary>
+        <div class="lm-chips">${t.names.map(n=>`<span class="lm-chip${pamph.has(lmNorm(n))?" lm-chip-doc":""}">${esc(n)}</span>`).join("")}</div>
+      </details>
+    </div>`;
+  }).join("");
+
+  const lenderRows=lenders.sort((a,b)=>({yes:0,maybe:1,no:2}[a.r.status]-{yes:0,maybe:1,no:2}[b.r.status])).map(({L,tiers:tt,r})=>{
+    const S=LM_STATUS[r.status];
+    const why=[...r.fails.map(x=>`✗ ${x}`),...r.warns.map(x=>`! ${x}`),...r.unknown.map(x=>`? ${x}`)];
+    return `<tr>
+      <td><b>${esc(L.name)}</b><div class="muted" style="font-size:.7rem">${esc(L.source)}</div></td>
+      <td>${tt.length?tt.map(esc).join(", "):`<span class="muted">Not on sheet</span>`}</td>
+      <td><span class="badge ${S.cls}">${S.txt}</span></td>
+      <td>${esc(r.program)}</td>
+      <td class="lm-why">${why.length?why.map(esc).join("<br>"):`<span class="status-ok">Meets every listed guideline</span>`}${L.notes.length?`<div class="muted" style="margin-top:4px">${L.notes.map(esc).join(" · ")}</div>`:""}</td>
+      <td>${L.email?`<a href="mailto:${esc(L.email)}">${esc(L.email)}</a>`:`<span class="muted">—</span>`}</td>
+    </tr>`;
+  }).join("");
+
+  const fmt=(R,k)=>R[k]==null?"—":(["rev","adb"].includes(k)?money(R[k]):k==="tib"?`${R[k]} mo`:String(R[k]));
+  const ruleCell=(R,k)=>{ let v=fmt(R,k);
+    if(k==="adb" && R.adbPct!=null) v=`${pct0(R.adbPct)} of rev`;
+    if(k==="fico" && R.ficoPref!=null && v!=="—") v=`${R.fico} (pref ${R.ficoPref})`; if(v==="—") return v; return `${v}${R.est&&R.est.includes(k)?" <span class=\"lm-est\">est.</span>":""}${R.soft&&R.soft.includes(k)?" <span class=\"lm-pref\">pref.</span>":""}`; };
+  const posCell=R=> (R.posMin==null && R.posMax==null? "Any" : `${R.posMin!=null?ordinal(R.posMin+1):"1st"}–${R.posMax!=null?ordinal(R.posMax+1):"any"}`)
+    + (R.posCount==="mca"?" (MCA only)":"") + (R.buyout!=null?" · more only as a buyout":"") + (R.profit?" · must be profitable":"") + (R.noDefault?" · no prior default":"") + (R.maxDebt!=null?` · debt ≤ ${pct0(R.maxDebt)}${R.est&&R.est.includes("maxDebt")?" est.":""}`:"");
+  const hrCell=R=> R.highRisk? `${R.highRisk.inds.map(i=>LM_INDUSTRIES[i].split(" /")[0]).join(", ")}: ${Object.entries(R.highRisk).filter(([k])=>k!=="inds").map(([k,v])=>`${LM_FIELD_LABEL[k]||k} ${["rev"].includes(k)?money(v):v}`).join(", ")}`:"—";
+  const guideRows=[
+    ...Object.entries(LM_TIERS).map(([t,P])=>{ const R=lmMerge({},P.rules); return {name:t,src:P.basis,R}; }),
+    ...LM_LENDERS.flatMap(L=>L.programs.map(p=>({name:`${L.name} — ${p.name}`,src:L.source,R:lmMerge(L.shared,p.rules)})))
+  ].map(({name,src,R})=>`<tr><td><b>${esc(name)}</b></td><td class="num">${ruleCell(R,"fico")}</td><td class="num">${ruleCell(R,"rev")}</td><td class="num">${ruleCell(R,"tib")}</td><td class="num">${ruleCell(R,"deposits")}</td><td class="num">${ruleCell(R,"negDays")}</td><td class="num">${ruleCell(R,"nsf")}</td><td class="num">${ruleCell(R,"adb")}</td><td>${posCell(R)}</td><td>${esc(hrCell(R))}</td></tr>`).join("");
+
+  // what the lender match did differently from the statement report (the report itself is unchanged)
+  const adj=[];
+  if(A.lmAdj.factoredShare>0) adj.push(`<b>Factoring counted as revenue:</b> ${A.lmAdj.factors.map(esc).join(", ")} remittances (${pct0(A.lmAdj.factoredShare)} of revenue) are the client's customer invoices paid early. Revenue used here: <b>${money(A.avgRev)}/mo</b> (statement report: ${money(base.avgRev)}/mo).`);
+  if(A.fintech.length) adj.push(`<b>Fintech loans kept apart from MCA positions:</b> ${A.fintech.map(l=>l.loans>1?`${esc(l.name)} ×${l.loans}`:esc(l.name)).join(", ")}. Tier 1, Tier 2 and IOU judge these by debt load (${pct0(A.holdback)} of revenue); MCA funders count them as positions. MCA positions: <b>${A.positions}</b> (statement report counts ${base.positions}).`);
+  if(A.lmAdj.dups.length) adj.push(`<b>Duplicate statement ignored:</b> ${A.lmAdj.dups.map(esc).join(", ")} matches another file (same account, period and ending balance). The statement report above still includes it.`);
+  if(A.lmAdj.missing.length) adj.push(`<b>Missing month:</b> no statement for ${A.lmAdj.missing.join(", ")}. Lenders want consecutive months.`);
+  const adjHtml= adj.length? `<div class="callout info" style="margin-top:0;margin-bottom:14px"><div style="font-weight:850;margin-bottom:4px">Adjusted for lender matching</div>${adj.map(x=>`<div style="margin-top:4px">• ${x}</div>`).join("")}</div>` : "";
+
+  // copyable shop list
+  const lines=[
+    `${A.name} — where to shop`,
+    `Inputs: FICO ${I.fico??"?"} · TIB ${I.tib!=null?I.tib+" mo":"?"} · ${I.state||"state ?"} · ${I.industry?LM_INDUSTRIES[I.industry]:"industry ?"} · prior default: ${I.prevDefault==="yes"?"yes":I.prevDefault==="no"?"no":"?"}${I.amount?` · ask ${money(I.amount)}`:""}`,
+    `Statements: ${money(A.avgRev)}/mo verified revenue · ${A.positions} MCA position(s)${A.fintech.length?` + ${A.fintech.length} fintech loan(s)`:""} · ${pct0(A.holdback)} of revenue to debt · ${A.avgNegDays.toFixed(1)} neg days/mo · ${A.avgOdNsf.toFixed(1)} NSF/OD per mo`,
+    ``,
+    ...tiers.map(t=>`${t.label}: ${LM_STATUS[t.status].txt}${t.fails.length?` — ${t.fails.join("; ")}`:t.warns.length?` — ${t.warns.join("; ")}`:""}`),
+    ``,
+    ...lenders.filter(x=>x.r.status!=="no").map(({L,r})=>`${L.name} (${r.program}): ${LM_STATUS[r.status].txt}${L.email?` · ${L.email}`:""}`)
+  ];
+  TEXTS.lm=lines.join("\n");
+
+  el.innerHTML = `<section class="panel lm-panel">
+    <div class="panel-head compact"><div>
+      <div class="eyebrow">Lender match</div>
+      <h3 style="font-size:1.15rem;margin-top:4px">Where to shop this file</h3>
+      <p>${headline}</p>
+    </div></div>
+    ${adjHtml}
+    ${missing.length?`<div class="callout warning" style="margin-top:0;margin-bottom:14px">Enter the client's <b>${missing.join(", ")}</b> above to finish the lender check. Checks that need them are marked <b>?</b> and don't count against a tier.</div>`:""}
+    <div class="lm-grid">${tierCards}</div>
+    <p class="hint" style="margin:12px 0 0">Higher tier = higher risk for the lender. Tiers 1–2 want clean files and give the best terms; each step up accepts more risk and prices for it.</p>
+    <h4 class="lm-sub">Lenders with guidelines on file (${goodL.length} good · ${maybeL.length} possible)</h4>
+    <div class="table-wrap"><table class="data-table">
+      <thead><tr><th>Lender</th><th>Your tier</th><th>Result</th><th>Best program</th><th>Why</th><th>Submit to</th></tr></thead>
+      <tbody>${lenderRows}</tbody></table></div>
+    <details class="advanced"><summary>Guidelines used</summary>
+      <p class="hint" style="margin:12px 0 8px"><span class="lm-est">est.</span> = estimated, no pamphlet for that tier yet. <span class="lm-pref">pref.</span> = lender lists it as preferred, so a miss is a warning, not a decline. Positions = which position the new advance would be. "MCA only" = fintech term loans and credit lines (OnDeck, Fundbox, Intuit, BlueVine…) are judged by debt load instead of counted as positions.</p>
+      <div class="table-wrap"><table class="data-table">
+        <thead><tr><th>Tier / lender</th><th class="num">FICO</th><th class="num">Revenue</th><th class="num">TIB</th><th class="num">Deposits</th><th class="num">Neg days</th><th class="num">NSF/OD</th><th class="num">ADB</th><th>Positions</th><th>High-risk industries</th></tr></thead>
+        <tbody>${guideRows}</tbody></table></div>
+    </details>
+    <div class="actions no-print">
+      <button class="primary-btn" onclick="copyStored('lm')">Copy shop list</button>
+    </div>
+    <div class="callout info">Matches use the pamphlets on file and your tier sheet. Lenders still decide; guidelines change without notice and aren't always followed to the letter.</div>
+  </section>`;
+}
+
+/* ---------- init & hooks (wrap existing functions without changing them) ---------- */
+function lmRenderSheetStatus(){
+  const s=lmSheet(), custom=!!lsGet(LM_SHEET_KEY);
+  const total=Object.values(s).reduce((a,x)=>a+x.length,0);
+  document.getElementById("lmSheetStatus").textContent=`${custom?"Your uploaded":"Built-in"} tier sheet: ${Object.keys(s).length} tiers · ${total} lender entries`;
+}
+function saLenderInit(){
+  document.getElementById("lmState").innerHTML=`<option value="">Not entered</option>`+LM_STATES.map(s=>`<option>${s}</option>`).join("");
+  document.getElementById("lmIndustry").innerHTML=Object.entries(LM_INDUSTRIES).map(([k,v])=>`<option value="${k}">${esc(v)}</option>`).join("");
+  LM_INPUT_IDS.forEach(id=>{ const e=document.getElementById(id); e.addEventListener("input",saRenderLenders); e.addEventListener("change",saRenderLenders); });
+  document.getElementById("lmSheetInput").addEventListener("change",e=>{
+    const f=e.target.files[0]; e.target.value=""; if(!f) return;
+    const r=new FileReader();
+    r.onload=()=>{ try{ const s=lmParseCsv(String(r.result)); lsSet(LM_SHEET_KEY,JSON.stringify(s)); lmRenderSheetStatus(); saRenderLenders(); }
+                   catch(err){ alert("Couldn't read that CSV: "+err.message); } };
+    r.readAsText(f);
+  });
+  document.getElementById("lmSheetReset").addEventListener("click",()=>{ lsSet(LM_SHEET_KEY,null); lmRenderSheetStatus(); saRenderLenders(); });
+  lmRenderSheetStatus();
+  saRenderLenders();
+}
+{
+  const baseReport=saRenderReport;
+  saRenderReport=function(){ baseReport(); saRenderLenders(); };
+  const baseInit=saInit;
+  saInit=function(){ baseInit(); saLenderInit(); };
+  const baseRun=saRun;
+  saRun=async function(){ await baseRun(); saRenderLenders(); };
+  // Save: add the lender inputs to the saved analysis file
+  const baseSave=saSaveJson;
+  saSaveJson=function(){
+    const s=JSON.stringify;
+    JSON.stringify=function(v,...r){ if(v && v.kind==="statement-analysis") v={...v,lender:lmInputsGet()}; return s.call(JSON,v,...r); };
+    try{ baseSave(); } finally{ JSON.stringify=s; }
+  };
+  // Load: restore the lender inputs from a saved file (reads the file before the original loader clears the input)
+  document.addEventListener("change",e=>{
+    if(!e.target || e.target.id!=="saLoadInput" || !e.target.files[0]) return;
+    const r=new FileReader();
+    r.onload=()=>{ try{ const p=JSON.parse(r.result); if(p && p.lender){ lmInputsSet(p.lender); saRenderLenders(); } }catch(err){} };
+    r.readAsText(e.target.files[0]);
+  },true);
+}
+
+
+
+function setupTabs(){
+  document.querySelectorAll(".nav-tab").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      document.querySelectorAll(".nav-tab").forEach(x=>x.classList.remove("active"));
+      document.querySelectorAll(".tab-panel").forEach(x=>x.classList.remove("active"));
+      btn.classList.add("active");
+      document.getElementById(btn.dataset.tab).classList.add("active");
+      const crumb=document.getElementById("crumb"); if(crumb) crumb.textContent=btn.dataset.label||btn.textContent.trim();
+      window.scrollTo({top:0,behavior:"smooth"});
+    });
+  });
+}
+
+function setupClientPanel(){
+  const panel=document.getElementById("clientPanel");
+  const scrim=document.getElementById("clientScrim");
+  const setOpen=o=>{ panel.classList.toggle("open",o); if(scrim) scrim.classList.toggle("open",o); };
+  document.getElementById("toggleClientPanel").addEventListener("click",()=>setOpen(!panel.classList.contains("open")));
+  document.getElementById("closeClientPanel").addEventListener("click",()=>setOpen(false));
+  if(scrim) scrim.addEventListener("click",()=>setOpen(false));
+  document.addEventListener("keydown",e=>{ if(e.key==="Escape") setOpen(false); });
+}
+
+function boot(){
+  const select=document.getElementById("productSelect");
+  ORDER.forEach(p=>select.add(new Option(p,p)));
+  select.addEventListener("change",renderInputs);
+
+  ["clientName","monthlyRevenue","fico","monthsBusiness"].forEach(id=>{
+    document.getElementById(id).addEventListener("input",calculate);
+  });
+
+  ["matchUse","matchUrgency","matchCredit","matchRecurring","matchInvoices","matchPO","matchEquipment","matchProperty"].forEach(id=>{
+    document.getElementById(id).addEventListener("input",runMatcher);
+    document.getElementById(id).addEventListener("change",runMatcher);
+  });
+
+  document.getElementById("libraryFilter").addEventListener("change",renderLibrary);
+
+  document.getElementById("payoutMode").addEventListener("change",applyPayoutMode);
+  ["commissionPct","psfPct"].forEach(id=>{
+    document.getElementById(id).addEventListener("input",()=>{
+      document.getElementById("payoutMode").value="custom";
+      calcPayout();
+    });
+  });
+  ["totalCommission","actualPSF"].forEach(id=>{
+    document.getElementById(id).addEventListener("input",calcPayout);
+  });
+
+  setupTabs();
+  setupClientPanel();
+  renderInputs();
+  runMatcher();
+  renderLibrary();
+  applyPayoutMode();
+  saInit();
+}
+
+boot();
+
+</script>
+</body>
+</html>
